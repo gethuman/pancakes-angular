@@ -1,0 +1,39 @@
+{
+  "name": "pancakes-angular",
+  "version": "0.0.1",
+  "description": "Pancakes plugin for Angular",
+  "main": "lib/pancakes-angular.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gethuman/pancakes-angular.git"
+  },
+  "keywords": [
+    "javascript",
+    "pancakes",
+    "angular",
+    "isomorphic"
+  ],
+  "author": "Jeff Whelpley",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gethuman/pancakes-angular/issues"
+  },
+  "homepage": "https://github.com/gethuman/pancakes-angular",
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "pancakes": "0.0.12",
+    "q": "^1.0.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.8",
+    "mocha": "~1.21.5",
+    "chai": "~1.9.2",
+    "sinon": "^1.10.3",
+    "sinon-chai": "^2.6.0",
+    "chai-as-promised": "^4.1.1",
+    "blanket": "^1.1.6",
+    "gulp-mocha": "^1.1.1",
+    "gulp-watch": "^1.1.0",
+    "gulp-jshint": "^1.8.5"
+  }
+}
