@@ -1,0 +1,7 @@
+angular.module('{{=it.appName}}', [{{~it.deps :dep:index}}'{{=dep}}'{{? index < (it.deps.length - 1) }}, {{?}}{{~}}]);
+
+{{? it.schema }}
+angular.module('{{=it.appName}}').factory('schemaDefinitions', function () {
+    return {{= it.schema }};
+});
+{{?}}

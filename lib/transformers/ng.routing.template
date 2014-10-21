@@ -1,0 +1,17 @@
+angular.module('{{=it.appName}}').config([
+    '$stateProvider', '$locationProvider', 'stateLoaderProvider',
+    function ($stateProvider, $locationProvider, stateLoader) {
+
+        // use push state on the client side
+        $locationProvider.html5Mode(true);
+
+        // load all the states into the state loader
+        stateLoader.loadStates($stateProvider, {{=it.routes}}, {
+            {{ for (var name in it.resolveHandlers) { }}
+            '{{=name}}': {{=it.resolveHandlers[name]}},
+            {{ } }}
+            end: true
+        });
+    }
+]);
+

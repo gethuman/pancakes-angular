@@ -10,12 +10,30 @@ var sinon           = require('sinon');
 var chai            = require('chai');
 var sinonChai       = require('sinon-chai');
 var chaiAsPromised  = require('chai-as-promised');
-var mochaAsPromised = require('mocha-as-promised');
 var path            = require('path');
+var pancakes        = require('pancakes');
+var jshint          = require('jshint').JSHINT;
+var prettyjson      = require('prettyjson');
 
-mochaAsPromised();
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
+
+pancakes.init({
+    preload:        ['utils'],
+    rootDir:        __dirname + '/fixtures',
+    require:        require,
+    container:      'webserver',
+    clientPlugin: {
+        init:           function () {},
+        renderPage:     function () {}
+    },
+    serverPlugin: {
+        init:           function () {},
+        addApiRoutes:   function () {},
+        addWebRoutes:   function () {}
+    },
+    adapterMap:     {}
+});
 
 /**
  * Used to wrap all promises
@@ -23,9 +41,9 @@ chai.use(chaiAsPromised);
  * @param done Optional param if it exists, will do notify at end
  * @returns {*|Promise.<Array.<Object>>}
  */
-var all = function (promises, done) {
+function all(promises, done) {
     return done ? Q.all(promises).should.notify(done) : Q.all(promises);
-};
+}
 
 /**
  * Shorthand for just making sure a promise eventually equals a value
@@ -33,21 +51,43 @@ var all = function (promises, done) {
  * @param expected
  * @param done
  */
-var eventuallySame = function (promise, expected, done) {
+function eventuallySame(promise, expected, done) {
     all([
         promise.should.be.fulfilled,
         promise.should.eventually.deep.equal(expected)
     ], done);
-};
+}
 
-var target = function (relativePath) {
+/**
+ * Require the target
+ * @param relativePath
+ * @returns {*}
+ */
+function target(relativePath) {
     return require('../lib/' + relativePath);
-};
+}
+
+/**
+ * eval code with a mock angular object
+ * @param code
+ */
+function validateCode(code) {
+    var success = jshint(code);
+
+    if (!success) {
+        console.log('\n\nerror with the following generated code:\n\n' + code + '\n');
+        console.log('JSHINT ERRORS\n' + prettyjson.render(jshint.errors));
+    }
+
+    return success;
+}
 
 module.exports = {
     all: all,
     eventuallySame: eventuallySame,
     target: target,
+    validateCode: validateCode,
+
     fixturesDir: __dirname + '/fixtures',
     delim: path.normalize('/'),
 

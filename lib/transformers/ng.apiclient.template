@@ -1,0 +1,14 @@
+angular.module('{{=it.appName}}').factory('{{=it.serviceName}}', [
+    'ajax', function (ajax) {
+        return {
+            {{ for (var methodName in it.methods) { }}
+            {{=methodName}}: function (req) {
+                return ajax.send('{{=it.methods[methodName].url}}', '{{=it.methods[methodName].httpMethod}}', req, '{{=it.resourceName}}');
+            },
+            {{ } }}
+            whoAmI: function () {
+                return '{{=it.serviceName}}';
+            }
+        };
+    }
+]);
