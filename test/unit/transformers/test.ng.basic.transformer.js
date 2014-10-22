@@ -47,7 +47,7 @@ describe('UNIT ' + name, function () {
             };
 
             var code = transformer.template(model);
-            taste.validateCode(code).should.equal(true);
+            taste.validateCode(code, false).should.equal(true);
         });
 
         it('should return back valid JS with raw', function () {
@@ -65,7 +65,7 @@ describe('UNIT ' + name, function () {
             };
 
             var code = transformer.template(model);
-            taste.validateCode('var testblah = ' + code + ';').should.equal(true);
+            taste.validateCode(code, true).should.equal(true);
         });
     });
 });

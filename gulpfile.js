@@ -64,6 +64,10 @@ gulp.task('watch', function (){
     gulp.src(clientjs).pipe(karma({ configFile: 'test/karma.config.js', action: 'watch' }));
 });
 
+gulp.task('ngwatch', function (){
+    gulp.src(clientjs).pipe(karma({ configFile: 'test/karma.config.js', action: 'watch' }));
+});
+
 gulp.task('default', ['jshint', 'test', 'ngtest', 'build']);
 
 

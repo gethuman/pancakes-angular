@@ -23,6 +23,7 @@ pancakes.init({
     rootDir:        __dirname + '/fixtures',
     require:        require,
     container:      'webserver',
+    componentPrefix:'gh',
     clientPlugin: {
         init:           function () {},
         renderPage:     function () {}
@@ -71,8 +72,10 @@ function target(relativePath) {
  * eval code with a mock angular object
  * @param code
  */
-function validateCode(code) {
-    var success = jshint(code);
+function validateCode(code, isRaw) {
+    var success = isRaw ?
+        jshint('var blah = ' + code + ';') :
+        jshint(code);
 
     if (!success) {
         console.log('\n\nerror with the following generated code:\n\n' + code + '\n');

@@ -10,7 +10,7 @@ angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
 
             {{? it.directiveScope }}
             ,
-            scope:          {{=it.directiveScope}}
+            scope: {{=it.directiveScope}}
             {{?}}
         };
     }
@@ -18,8 +18,8 @@ angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
 {{?}}
 
 angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
-    {{~it.convertedParams :param}}'{{=param}}', {{~}}'$scope', 'tplHelper',
-    function({{~it.params :param}}{{=param}}, {{~}}$scope, tplHelper) {
+    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', 'tplHelper',
+    function({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, tplHelper) {
 
         {{~it.ngrefs :param}}
         var {{=param}} = angular;
@@ -29,8 +29,18 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.attachToScope     }}tplHelper.attachToScope($scope, {{=it.attachToScope}});{{?}}
         {{? it.shouldRenderModel }}tplHelper.execRenderModel($scope, {{=it.renderModelFn}}, {{=it.scopeWatchers}});{{?}}
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
-        {{? it.eventBusListeners }}tplHelper.registerListeners($scope, {{=it.eventBusListeners}});{{?}}
-        {{? it.uiEventHandlers   }}tplHelper.addEventHandlers($scope, {{=it.uiEventHandlers}});{{?}}
+        {{? it.eventBusListeners }}tplHelper.registerListeners($scope, {
+        {{ for (var lName in it.eventBusListeners) { }}
+            '{{=lName}}': {{=it.eventBusListeners[lName]}},
+        {{ } }}
+            end: null
+        });{{?}}
+        {{? it.uiEventHandlers   }}tplHelper.addEventHandlers($scope, {
+        {{ for (var uName in it.uiEventHandlers) { }}
+            '{{=uName}}': {{=it.uiEventHandlers[uName]}},
+        {{ } }}
+            end: null
+        });{{?}}
 
         {{=it.body}}
     }

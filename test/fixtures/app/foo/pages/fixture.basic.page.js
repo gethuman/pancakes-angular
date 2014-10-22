@@ -6,5 +6,8 @@
  *
  */
 module.exports = {
-    foo: 'choo'
+    foo: 'choo',
+    model: function (i18n) {
+        return i18n.translate('blah');
+    }
 };
