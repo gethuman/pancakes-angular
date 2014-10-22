@@ -13,7 +13,7 @@ describe('UNIT client.event.bus', function () {
             inject(function (eventBus) {
                 eventBus.on('something', function () { done(); });
                 eventBus.emit('something');
-            })
+            });
         });
     });
 });

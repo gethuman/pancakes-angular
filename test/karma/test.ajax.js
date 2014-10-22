@@ -5,7 +5,6 @@
  *
  */
 describe('UNIT ajax', function () {
-    var apiOpts;
 
     beforeEach(module('pancakesAngular', function ($provide) {
         $provide.value('config', { apiBase: '/' });

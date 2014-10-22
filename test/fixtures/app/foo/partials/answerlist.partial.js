@@ -23,6 +23,8 @@ module.exports = {
             reply().redirect('/again');
         }
     },
+
+    /* jshint quotmark:false */
     view: function (div, span, a, h3) {
         return div({ 'class': 'answrs' },
             div(

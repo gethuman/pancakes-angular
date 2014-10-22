@@ -8,6 +8,7 @@
 var name        = 'transformers/ng.uipart.transformer';
 var taste       = require('../../taste');
 var transformer = taste.target(name);
+var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
     var ngPrefix = 'tst';
@@ -63,7 +64,6 @@ describe('UNIT ' + name, function () {
             };
             var opts = { raw: true, isClient: true };
 
-            var expected = {};
             var actual = transformer.renderObjFns(obj, opts);
             actual.should.have.property('one');
             actual.should.have.property('two');
@@ -106,13 +106,13 @@ describe('UNIT ' + name, function () {
                     return div(
                         span('hello, world'),
                         subviews.first
-                    )
+                    );
                 },
                 subviews: {
                     first: function (div, a) {
                         return div(
                             a({ href: '/' }, 'hello again')
-                        )
+                        );
                     }
                 }
             };

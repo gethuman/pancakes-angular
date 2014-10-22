@@ -38,7 +38,7 @@ describe('UNIT ' + name, function () {
         var modelFlapjack = function () {
             return function (model) {
                 model.another = 'yes';
-            }
+            };
         };
         var expected = { foo: 'boo', another: 'yes' };
         jng.modifyModel(model, modelFlapjack);
