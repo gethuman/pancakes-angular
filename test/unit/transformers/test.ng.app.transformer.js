@@ -8,12 +8,17 @@
 var name        = 'transformers/ng.app.transformer';
 var taste       = require('../../taste');
 var transformer = taste.target(name);
+var pancakes    = require('pancakes');
+var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
+    var context = { pancakes: pancakes };
+    _.extend(context, pancakes.baseTransformer, transformer);
+
     describe('getSchemaValidations()', function () {
         it('should return null if includeSchemas false', function () {
             var appInfo = {};
-            var actual = transformer.getSchemaValidations(appInfo);
+            var actual = transformer.getSchemaValidations.call(context, appInfo, null);
             taste.expect(actual).to.be.null;
         });
 
@@ -27,7 +32,7 @@ describe('UNIT ' + name, function () {
                 blah: { fld1: { ui: true, foo: 'choo' } },
                 wham: { fld3: { ui: true, so: 'no' } }
             };
-            var actual = transformer.getSchemaValidations(appInfo, resources);
+            var actual = transformer.getSchemaValidations.call(context, appInfo, resources);
             actual.should.deep.equal(expected);
         });
     });
@@ -36,7 +41,7 @@ describe('UNIT ' + name, function () {
         it('should return empty string if no validations', function () {
             var validations = null;
             var expected = '';
-            var actual = transformer.stringify(validations);
+            var actual = transformer.stringify.call(context, validations);
             actual.should.equal(expected);
         });
         
@@ -46,7 +51,7 @@ describe('UNIT ' + name, function () {
                 wham: { fld3: { ui: true, type: Number } }
             };
             var expected = '{"blah":{"fld1":{"ui":true,"match":"/asdf/"}},"wham":{"fld3":{"ui":true,"type":"Number"}}}';
-            var actual = transformer.stringify(validations);
+            var actual = transformer.stringify.call(context, validations);
             actual.should.equal(expected);
         });
     });
@@ -59,7 +64,7 @@ describe('UNIT ' + name, function () {
                 schema:     '{"blah":{"fld1":{"ui":true,"match":"/asdf/"}},"wham":{"fld3":{"ui":true,"type":"Number"}}}'
             };
 
-            var code = transformer.template(model);
+            var code = taste.getTemplate('app')(model);
             taste.validateCode(code).should.equal(true);
         });
     });

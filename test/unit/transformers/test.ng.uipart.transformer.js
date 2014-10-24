@@ -8,35 +8,39 @@
 var name        = 'transformers/ng.uipart.transformer';
 var taste       = require('../../taste');
 var transformer = taste.target(name);
+var pancakes    = require('pancakes');
+var jeff        = require('jeff-core');
 var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
     var ngPrefix = 'tst';
+    var context = { pancakes: pancakes, jeff: jeff, transformers: { basic: { transform: function () { return null; }}} };
+    _.extend(context, pancakes.baseTransformer, pancakes.utils, pancakes.annotations, transformer);
 
     describe('parseNames()', function () {
         it('should get the app name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'tstBooyeahApp';
-            var names = transformer.parseNames(filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, ngPrefix);
             names.appName.should.equal(expected);
         });
 
         it('should identify page as NOT a partial', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
-            var names = transformer.parseNames(filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, ngPrefix);
             names.isPartial.should.equal(false);
         });
 
         it('should identify path as a partial', function () {
             var filePath = '/app/booyeah/partials/my.home.partial.js';
-            var names = transformer.parseNames(filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, ngPrefix);
             names.isPartial.should.equal(true);
         });
 
         it('should get the ui part name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'my.home';
-            var names = transformer.parseNames(filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, ngPrefix);
             names.uiPartName.should.equal(expected);
             names.viewUrl.should.equal('templates/' + expected);
         });
@@ -44,14 +48,14 @@ describe('UNIT ' + name, function () {
         it('should set the directive name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'tstMyHome';
-            var names = transformer.parseNames(filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, ngPrefix);
             names.directiveName.should.equal(expected);
         });
 
         it('should set the directive name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'MyHomeCtrl';
-            var names = transformer.parseNames(filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, ngPrefix);
             names.controllerName.should.equal(expected);
         });
     });
@@ -64,7 +68,7 @@ describe('UNIT ' + name, function () {
             };
             var opts = { raw: true, isClient: true };
 
-            var actual = transformer.renderObjFns(obj, opts);
+            var actual = transformer.renderObjFns.call(context, obj, opts);
             actual.should.have.property('one');
             actual.should.have.property('two');
         });
@@ -94,7 +98,7 @@ describe('UNIT ' + name, function () {
                 body: '\n\t                    return _.extend({}, val, moo);\n\t                '
             };
 
-            var actual = transformer.getCtrlTemplateModel(uipart, names, options);
+            var actual = transformer.getCtrlTemplateModel.call(context, uipart, names, options);
             actual.should.deep.equal(expected);
         });
     });
@@ -118,19 +122,8 @@ describe('UNIT ' + name, function () {
             };
 
             var expected = '<div><span>hello, world</span><div><a href="/">hello again</a></div></div>';
-            var actual = transformer.getHtml(uipart);
+            var actual = transformer.getHtml.call(context, uipart);
             actual.should.equal(expected);
-        });
-    });
-
-    describe('flapjack()', function () {
-        it('should generate code for a uipart', function () {
-            var filePath = __dirname + '/../../fixtures/app/foo/partials/answerlist.partial';
-            var flapjack = require(filePath);
-            var options = { filePath: filePath, ngPrefix: 'gh' };
-
-            var code = transformer.transform(flapjack, options);
-            taste.validateCode(code, false).should.equal(true);
         });
     });
 });

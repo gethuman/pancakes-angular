@@ -14,6 +14,11 @@ var path            = require('path');
 var pancakes        = require('pancakes');
 var jshint          = require('jshint').JSHINT;
 var prettyjson      = require('prettyjson');
+var fs              = require('fs');
+var dot             = require('dot');
+
+// universally set strip to false for dot templates (i.e. respect whitespace)
+dot.templateSettings.strip = false;
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -24,15 +29,8 @@ pancakes.init({
     require:        require,
     container:      'webserver',
     componentPrefix:'gh',
-    clientPlugin: {
-        init:           function () {},
-        renderPage:     function () {}
-    },
-    serverPlugin: {
-        init:           function () {},
-        addApiRoutes:   function () {},
-        addWebRoutes:   function () {}
-    },
+    clientPlugin:   function () {},
+    serverPlugin:   function () {},
     adapterMap:     {}
 });
 
@@ -52,7 +50,7 @@ function all(promises, done) {
  * @param expected
  * @param done
  */
-function eventuallySame(promise, expected, done) {
+function eventuallyEqual(promise, expected, done) {
     all([
         promise.should.be.fulfilled,
         promise.should.eventually.deep.equal(expected)
@@ -85,11 +83,23 @@ function validateCode(code, isRaw) {
     return success;
 }
 
+/**
+ * Get a dot template
+ * @param name
+ * @returns {*}
+ */
+function getTemplate(name) {
+    var filePath = __dirname + '/../lib/transformers/ng.' + name + '.template';
+    var file = fs.readFileSync(path.normalize(filePath));
+    return dot.template(file);
+}
+
 module.exports = {
     all: all,
-    eventuallySame: eventuallySame,
+    eventuallyEqual: eventuallyEqual,
     target: target,
     validateCode: validateCode,
+    getTemplate: getTemplate,
 
     fixturesDir: __dirname + '/fixtures',
     delim: path.normalize('/'),

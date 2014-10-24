@@ -1,6 +1,6 @@
 {{? !it.raw }}angular.module('{{=it.appName}}').{{=it.ngType}}({{? it.includeName }}'{{=it.moduleName}}', {{?}}{{?}}[
     {{~it.convertedParams :param:index}}"{{=param}}", {{~}}
-    function({{~it.params :param:index}}{{=param}}{{? index < (it.params.length - 1) }}, {{?}}{{~}}) {
+    function ({{~it.params :param:index}}{{=param}}{{? index < (it.params.length - 1) }}, {{?}}{{~}}) {
         {{~it.ngrefs :param:index}}
         var {{=param}} = angular;
         {{~}}

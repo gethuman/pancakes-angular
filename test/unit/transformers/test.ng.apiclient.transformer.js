@@ -7,14 +7,19 @@
 var name        = 'transformers/ng.apiclient.transformer';
 var taste       = require('../../taste');
 var transformer = taste.target(name);
+var pancakes    = require('pancakes');
+var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
-    var appName = 'testApp';
+    var ngPrefix = 'pc';
+    var appName = 'test';
+    var context = { pancakes: pancakes };
+    _.extend(context, pancakes.baseTransformer, pancakes.utils, transformer);
 
     describe('getTemplateModel()', function () {
         it('should null if no api', function () {
             var resource = { name: 'blah' };
-            var actual = transformer.getTemplateModel(resource, appName);
+            var actual = transformer.getTemplateModel.call(context, ngPrefix, resource, appName);
             taste.expect(actual).to.be.null;
         });
 
@@ -39,7 +44,7 @@ describe('UNIT ' + name, function () {
                 }
             };
             var expected = {
-                appName: appName,
+                appName: 'pcTestApp',
                 resourceName: resource.name,
                 serviceName: 'postService',
                 modelName: 'Post',
@@ -52,12 +57,12 @@ describe('UNIT ' + name, function () {
                 }
             };
 
-            var actual = transformer.getTemplateModel(resource, appName);
+            var actual = transformer.getTemplateModel.call(context, ngPrefix, resource, appName);
             actual.should.deep.equal(expected);
         });
     });
 
-    describe('transform()', function () {
+    describe('template()', function () {
         var model = {
             appName: appName,
             resourceName: 'post',
@@ -69,7 +74,7 @@ describe('UNIT ' + name, function () {
             }
         };
 
-        var code = transformer.template(model);
-        taste.validateCode(code).should.equal(true);
+        var code = taste.getTemplate('apiclient')(model);
+        taste.validateCode(code, false).should.equal(true);
     });
 });

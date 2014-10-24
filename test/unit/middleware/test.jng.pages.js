@@ -5,13 +5,23 @@
  *
  *
  */
-var name    = 'middleware/jng.pages';
-var taste   = require('../../taste');
-var jng     = taste.target(name);
-var jangular = require('jeff-jangular');
+var name        = 'middleware/jng.pages';
+var taste       = require('../../taste');
+var jng         = taste.target(name);
+var utils       = taste.target('middleware/jng.utils');
+var filters     = taste.target('middleware/jng.filters');
+var jangular    = require('jeff-jangular');
+var pancakes    = require('pancakes');
+var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
     var appName = 'foo';
+    var context = {
+        pancakes: pancakes,
+        jangular: jangular
+    };
+
+    _.extend(context, utils, jng, filters);
 
     describe('renderLayout()', function () {
         it('should return the rendered layout', function () {
@@ -24,7 +34,7 @@ describe('UNIT ' + name, function () {
             jangular.addShortcutsToScope(dependencies);
 
             var expected = '<div><span><a href="/blah">hello, world</a></span><div ng-if="something" ng-bind="boo">blah</div></div>';
-            var actual = jng.renderLayout(appName, layoutName, dependencies);
+            var actual = jng.renderLayout.call(context, appName, layoutName, dependencies);
             actual.should.equal(expected);
         });
     });
@@ -43,7 +53,7 @@ describe('UNIT ' + name, function () {
         };
         var model = { foo2: false };
         var expected = '<div><div>sub1</div></div>';
-        var actual = jng.renderPage(routeInfo, page, model);
+        var actual = jng.renderPage.call(context, routeInfo, page, model);
         actual.should.equal(expected);
     });
 });
