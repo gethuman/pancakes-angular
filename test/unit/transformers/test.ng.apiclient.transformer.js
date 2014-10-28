@@ -5,13 +5,13 @@
  *
  */
 var name        = 'transformers/ng.apiclient.transformer';
-var taste       = require('../../taste');
+var taste       = require('../../pancakes.angular.taste');
 var transformer = taste.target(name);
 var pancakes    = require('pancakes');
 var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
-    var ngPrefix = 'pc';
+    var prefix = 'pc';
     var appName = 'test';
     var context = { pancakes: pancakes };
     _.extend(context, pancakes.baseTransformer, pancakes.utils, transformer);
@@ -19,7 +19,7 @@ describe('UNIT ' + name, function () {
     describe('getTemplateModel()', function () {
         it('should null if no api', function () {
             var resource = { name: 'blah' };
-            var actual = transformer.getTemplateModel.call(context, ngPrefix, resource, appName);
+            var actual = transformer.getTemplateModel.call(context, prefix, resource, appName);
             taste.expect(actual).to.be.null;
         });
 
@@ -57,7 +57,7 @@ describe('UNIT ' + name, function () {
                 }
             };
 
-            var actual = transformer.getTemplateModel.call(context, ngPrefix, resource, appName);
+            var actual = transformer.getTemplateModel.call(context, prefix, resource, appName);
             actual.should.deep.equal(expected);
         });
     });

@@ -5,44 +5,17 @@
  * Build file for Pancakes
  */
 var gulp    = require('gulp');
-var mocha   = require('gulp-mocha');
-var jshint  = require('gulp-jshint');
-var watch   = require('gulp-watch');
-var karma   = require('gulp-karma');
 var concat  = require('gulp-concat');
 var rename  = require('gulp-rename');
 var uglify  = require('gulp-uglify');
 var ngann   = require('gulp-ng-annotate');
+var taste   = require('taste');
 
-var alljs = ['test/**/*.js', 'lib/**/*.js'];
-var serverjs = ['test/unit/**/*.js', 'lib/transformers/**/*.js'];
-var clientjs = [
-    'node_modules/angular/angular.js',
-    'node_modules/angular-mocks/angular-mocks.js',
-    'test/karma/**/*.js',
-    'lib/pancakes.angular.app.js',
-    'lib/ngapp/**/*.js'
-];
-
-gulp.task('jshint', function () {
-    return gulp.src(alljs)
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'));
-});
-
-gulp.task('test', function () {
-    return gulp.src('test/unit/**/*.js')
-        .pipe(mocha({
-            growl: true,
-            ui: 'bdd',
-            reporter: 'progress',
-            timeout: 5000,
-            require: 'test/setup'
-        }));
-});
-
-gulp.task('ngtest', function () {
-    return gulp.src(clientjs).pipe(karma({ configFile: 'test/karma.config.js', action: 'run' }));
+taste.init({
+    gulp:       gulp,
+    rootDir:    __dirname + '/lib',
+    loadModule: require,
+    karmaTargetCode: ['lib/pancakes.angular.app.js', 'lib/ngapp/**/*.js']
 });
 
 gulp.task('build', function () {
@@ -59,15 +32,6 @@ gulp.task('min', function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('watch', function (){
-    gulp.watch(serverjs, ['jshint', 'test']);
-    gulp.src(clientjs).pipe(karma({ configFile: 'test/karma.config.js', action: 'watch' }));
-});
-
-gulp.task('ngwatch', function (){
-    gulp.src(clientjs).pipe(karma({ configFile: 'test/karma.config.js', action: 'watch' }));
-});
-
-gulp.task('default', ['jshint', 'test', 'ngtest', 'build']);
+gulp.task('default', ['jshint', 'test', 'test.karma', 'build']);
 
 

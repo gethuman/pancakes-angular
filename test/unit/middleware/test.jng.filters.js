@@ -6,10 +6,10 @@
  *
  */
 var name    = 'middleware/jng.filters';
-var taste   = require('../../taste');
+var taste   = require('../../pancakes.angular.taste');
 var jng     = taste.target(name);
 var utils       = taste.target('middleware/jng.utils');
-var jangular    = require('jeff-jangular');
+var jangular    = require('jangular');
 var pancakes    = require('pancakes');
 var _           = require('lodash');
 

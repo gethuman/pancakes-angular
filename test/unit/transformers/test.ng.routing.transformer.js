@@ -6,7 +6,7 @@
  *
  */
 var name        = 'transformers/ng.routing.transformer';
-var taste       = require('../../taste');
+var taste       = require('../../pancakes.angular.taste');
 var transformer = taste.target(name);
 var pancakes    = require('pancakes');
 var _           = require('lodash');

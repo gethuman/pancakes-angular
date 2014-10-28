@@ -6,22 +6,17 @@
  *
  */
 var name        = 'middleware/jng.pages';
-var taste       = require('../../taste');
+var taste       = require('../../pancakes.angular.taste');
 var jng         = taste.target(name);
 var utils       = taste.target('middleware/jng.utils');
 var filters     = taste.target('middleware/jng.filters');
-var jangular    = require('jeff-jangular');
-var jeff        = require('jeff-core');
+var jangular    = require('jangular');
 var pancakes    = require('pancakes');
 var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
     var appName = 'foo';
-    var context = {
-        pancakes:   pancakes,
-        jangular:   jangular,
-        jeff:       jeff
-    };
+    var context = { pancakes: pancakes };
 
     _.extend(context, utils, jng, filters);
 
@@ -33,7 +28,7 @@ describe('UNIT ' + name, function () {
                 another: false,
                 boo: 'blah'
             }};
-            jeff.addShortcutsToScope(dependencies);
+            jangular.addShortcutsToScope(dependencies);
 
             var expected = '<div><span><a href="/blah">hello, world</a></span><div ng-if="something" ng-bind="boo">blah</div></div>';
             var actual = jng.renderLayout.call(context, appName, layoutName, dependencies);

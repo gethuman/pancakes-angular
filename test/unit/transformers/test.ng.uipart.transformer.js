@@ -6,41 +6,40 @@
  *
  */
 var name        = 'transformers/ng.uipart.transformer';
-var taste       = require('../../taste');
+var taste       = require('../../pancakes.angular.taste');
 var transformer = taste.target(name);
 var pancakes    = require('pancakes');
-var jeff        = require('jeff-core');
 var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
-    var ngPrefix = 'tst';
-    var context = { pancakes: pancakes, jeff: jeff, transformers: { basic: { transform: function () { return null; }}} };
+    var prefix = 'tst';
+    var context = { pancakes: pancakes, transformers: { basic: { transform: function () { return null; }}} };
     _.extend(context, pancakes.baseTransformer, pancakes.utils, pancakes.annotations, transformer);
 
     describe('parseNames()', function () {
         it('should get the app name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'tstBooyeahApp';
-            var names = transformer.parseNames.call(context, filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, prefix);
             names.appName.should.equal(expected);
         });
 
         it('should identify page as NOT a partial', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
-            var names = transformer.parseNames.call(context, filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, prefix);
             names.isPartial.should.equal(false);
         });
 
         it('should identify path as a partial', function () {
             var filePath = '/app/booyeah/partials/my.home.partial.js';
-            var names = transformer.parseNames.call(context, filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, prefix);
             names.isPartial.should.equal(true);
         });
 
         it('should get the ui part name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'my.home';
-            var names = transformer.parseNames.call(context, filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, prefix);
             names.uiPartName.should.equal(expected);
             names.viewUrl.should.equal('templates/' + expected);
         });
@@ -48,14 +47,14 @@ describe('UNIT ' + name, function () {
         it('should set the directive name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'tstMyHome';
-            var names = transformer.parseNames.call(context, filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, prefix);
             names.directiveName.should.equal(expected);
         });
 
         it('should set the directive name', function () {
             var filePath = '/app/booyeah/pages/my.home.page.js';
             var expected = 'MyHomeCtrl';
-            var names = transformer.parseNames.call(context, filePath, ngPrefix);
+            var names = transformer.parseNames.call(context, filePath, prefix);
             names.controllerName.should.equal(expected);
         });
     });
