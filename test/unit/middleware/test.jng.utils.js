@@ -27,7 +27,7 @@ describe('UNIT ' + name, function () {
             jng.setDefaults.call(context, model, defaults);
             model.should.deep.equal(defaults);
         });
-        
+
         it('should not overwrite value that already there', function () {
             var model = { one: 'zoo' };
             var defaults = { one: 'foo', two: 'choo' };
@@ -54,6 +54,32 @@ describe('UNIT ' + name, function () {
             var names = jng.getAppFileNames.call(context, appName, dir);
             taste.should.exist(names);
             names.length.should.be.greaterThan(0);
+        });
+    });
+
+    describe('getJangularDeps()', function () {
+        it('should return all the jangular and jyt dependencies', function () {
+            var deps = jng.getJangularDeps.call(context);
+            taste.should.exist(deps.div);
+            taste.should.exist(deps.span);
+        });
+    });
+
+    describe('dotToCamelCase()', function () {
+        it('should return camel case for dot case file name', function () {
+            var fileName = 'some.thing.here.js';
+            var expected = 'someThingHere';
+            var actual = jng.dotToCamelCase(fileName);
+            actual.should.equal(expected);
+        });
+    });
+
+    describe('registerJytPlugins()', function () {
+        it('should register the jyt plugins', function () {
+            jng.registerJytPlugins.call(context);
+            var deps = jng.getJangularDeps();
+            taste.should.exist(deps.testAnother);
+            taste.should.exist(deps.testStars);
         });
     });
 });

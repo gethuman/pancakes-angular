@@ -16,8 +16,7 @@ var _           = require('lodash');
 describe('UNIT ' + name, function () {
     var appName = 'foo';
     var context = {
-        pancakes: pancakes,
-        jangular: jangular
+        pancakes: pancakes
     };
 
     _.extend(context, utils, jng);
