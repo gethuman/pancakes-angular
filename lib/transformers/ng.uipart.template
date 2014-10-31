@@ -25,9 +25,11 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         var {{=param}} = angular;
         {{~}}
 
+        {{? it.isPartial         }}tplHelper.computeModelFn($scope, {{=it.computeModelFn}});{{?}}
         {{? it.defaults          }}tplHelper.setDefaults($scope, {{=it.defaults}});{{?}}
         {{? it.attachToScope     }}tplHelper.attachToScope($scope, {{=it.attachToScope}});{{?}}
-        {{? it.shouldRenderModel }}tplHelper.execRenderModel($scope, {{=it.renderModelFn}}, {{=it.scopeWatchers}});{{?}}
+        {{? it.useScopeRerender  }}tplHelper.rerenderOnWatch($scope, {{=it.scopeWatchers}});{{?}}
+        {{? it.useEventRerender  }}tplHelper.rerenderOnEvent($scope, {{=it.eventWatchers}});{{?}}
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
         {{? it.eventBusListeners }}tplHelper.registerListeners($scope, {
         {{ for (var lName in it.eventBusListeners) { }}
@@ -38,6 +40,12 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.uiEventHandlers   }}tplHelper.addEventHandlers($scope, {
         {{ for (var uName in it.uiEventHandlers) { }}
             '{{=uName}}': {{=it.uiEventHandlers[uName]}},
+        {{ } }}
+            end: null
+        });{{?}}
+        {{? it.validations       }}tplHelper.addValidations($scope, {
+        {{ for (var vName in it.validations) { }}
+            '{{=vName}}': {{=it.validations[vName]}},
         {{ } }}
             end: null
         });{{?}}

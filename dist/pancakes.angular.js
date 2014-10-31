@@ -125,10 +125,10 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
  *
  * Client side implementation of pancakes.utensils.chainPromises()
  */
-angular.module('pancakesAngular').factory('chainPromises', function () {
+angular.module('pancakesAngular').factory('chainPromises', function ($q) {
     return function chainPromises(calls, val) {
-        if (!calls || !calls.length) { return Q.when(val); }
-        return calls.reduce(Q.when, Q.when(val));
+        if (!calls || !calls.length) { return $q.when(val); }
+        return calls.reduce($q.when, $q.when(val));
     };
 });
 /**
@@ -221,7 +221,9 @@ angular.module('pancakesAngular').factory('config', function () {
 
                             attrName === 'text' ?
                                 element.text(value) :
-                                attrs.$set(attrName, value, scope);
+                                attrName === 'class' ?
+                                    attrs.$addClass(value) :
+                                    attrs.$set(attrName, value, scope);
 
                             // if bind once, we are unwatch after the first time
                             if (isBindOnce && unwatch) { unwatch(); }
@@ -450,6 +452,33 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
     }
 
     /**
+     * This is used to re-render the model (wrapped in a fn so we can pass into watch and eventBus)
+     *
+     * @param scope
+     * @param fn
+     */
+    function computeModelFn(scope, fn) {
+        if (!fn) { return; }
+
+        var computeModel = $injector.invoke(fn);
+        scope.recomputeModel = function () { computeModel(scope); };
+        scope.recomputeModel();
+    }
+
+    /**
+     * Add validations to the scope
+     * @param scope
+     * @param validations
+     */
+    function addValidations(scope, validations) {
+        for (var name in validations) {
+            if (validations.hasOwnProperty(name) && validations[name]) {
+                scope[name] = $injector.invoke(validations[name]);
+            }
+        }
+    }
+
+    /**
      * Given an array of items, instantiate them and attach them to the scope.
      * @param scope
      * @param itemsToAttach
@@ -473,23 +502,44 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
      * watchers for when it should be re-rendered.
      *
      * @param scope
-     * @param renderModelFn
      * @param scopeWatchers
      */
-    function execRenderModel(scope, renderModelFn, scopeWatchers) {
-        var renderModel = $injector.invoke(renderModelFn);
-        renderModel(scope);
+    function rerenderOnWatch(scope, scopeWatchers) {
+        var i, watchExp;
 
-        function rerenderModel() {
-            renderModel(scope);
-        }
-
+        // set up the watchers if they exist
         if (scopeWatchers) {
-            var i, watchExp;
             for (i = 0; i < scopeWatchers.length; i++) {
                 watchExp = scopeWatchers[i];
-                scope.$watch(watchExp, rerenderModel);
+                scope.$watch(watchExp, scope.recomputeModel);
             }
+        }
+    }
+
+    /**
+     * Create the render model function, execute it and set up
+     * watchers for when it should be re-rendered.
+     *
+     * @param scope
+     * @param eventWatchers
+     */
+    function rerenderOnEvent(scope, eventWatchers) {
+        var i, eventName;
+        var fns = [];  // these will hold callbacks for removing listeners
+
+        // set up the watchers if they exist
+        if (eventWatchers) {
+            for (i = 0; i < eventWatchers.length; i++) {
+                eventName = eventWatchers[i];
+                fns.push(eventBus.on(eventName, scope.recomputeModel));
+            }
+
+            // make sure handlers are destroyed along with scope
+            scope.$on('$destroy', function () {
+                for (var i = 0; i < fns.length; i++) {
+                    fns[i]();
+                }
+            });
         }
     }
 
@@ -525,7 +575,7 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
             }
         }
 
-        // make sure handler is destroyed along with scope
+        // make sure handlers are destroyed along with scope
         scope.$on('$destroy', function () {
             for (var i = 0; i < fns.length; i++) {
                 fns[i]();
@@ -551,8 +601,11 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
     // expose functions
     return {
         setDefaults: setDefaults,
+        computeModelFn: computeModelFn,
+        addValidations: addValidations,
         attachToScope: attachToScope,
-        execRenderModel: execRenderModel,
+        rerenderOnWatch: rerenderOnWatch,
+        rerenderOnEvent: rerenderOnEvent,
         addInitModel: addInitModel,
         registerListeners: registerListeners,
         addEventHandlers: addEventHandlers
