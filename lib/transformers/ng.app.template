@@ -5,3 +5,12 @@ angular.module('{{=it.appName}}').factory('schemaDefinitions', function () {
     return {{= it.schema }};
 });
 {{?}}
+
+{{? it.initLoad }}
+angular.module('{{=it.appName}}').run([
+    {{~it.initLoad :param:index}}'{{=param}}', {{~}}
+    function ({{~it.initLoad :param:index}}{{=param}}{{? index < (it.initLoad.length - 1) }}, {{?}}{{~}}) {
+        // do nothing here. by simply referencing load params, they will be executed
+    }
+]);
+{{?}}
