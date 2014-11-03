@@ -2,7 +2,7 @@ module.exports = {
     scope: { question: '=' },
     attachToScope: ['routeHelper', 'answerState'],
     defaults: { myman: 'yes' },
-    scopeWatchers: ['question.answers', 'question.stats.count.answers'],
+    rebindOnScopeChange: ['question.answers', 'question.stats.count.answers'],
     eventBusListeners: {
         'start.up': function (modals) {
             modals.show('yes');

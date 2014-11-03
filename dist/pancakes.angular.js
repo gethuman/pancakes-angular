@@ -461,8 +461,8 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
         if (!fn) { return; }
 
         var computeModel = $injector.invoke(fn);
-        scope.recomputeModel = function () { computeModel(scope); };
-        scope.recomputeModel();
+        scope.rebindModel = function () { computeModel(scope); };
+        scope.rebindModel();
     }
 
     /**
@@ -502,24 +502,24 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
      * watchers for when it should be re-rendered.
      *
      * @param scope
-     * @param scopeWatchers
+     * @param rebindOnScopeChange
      */
-    function rerenderOnWatch(scope, scopeWatchers) {
+    function rebindOnScopeChange(scope, rebindOnScopeChange) {
         var i, watchExp, firstChar;
 
         // set up the watchers if they exist
-        if (scopeWatchers) {
-            for (i = 0; i < scopeWatchers.length; i++) {
-                watchExp = scopeWatchers[i];
+        if (rebindOnScopeChange) {
+            for (i = 0; i < rebindOnScopeChange.length; i++) {
+                watchExp = rebindOnScopeChange[i];
                 firstChar = watchExp.charAt(0);
                 if (firstChar === '^') {
-                    scope.$watchCollection(watchExp.substring(1), scope.recomputeModel);
+                    scope.$watchCollection(watchExp.substring(1), scope.rebindModel);
                 }
                 else if (firstChar === '*') {
-                    scope.$watch(watchExp.substring(1), scope.recomputeModel, true);
+                    scope.$watch(watchExp.substring(1), scope.rebindModel, true);
                 }
                 else {
-                    scope.$watch(watchExp, scope.recomputeModel);
+                    scope.$watch(watchExp, scope.rebindModel);
                 }
             }
         }
@@ -530,17 +530,17 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
      * watchers for when it should be re-rendered.
      *
      * @param scope
-     * @param eventWatchers
+     * @param rebindOnEvent
      */
-    function rerenderOnEvent(scope, eventWatchers) {
+    function rerenderOnEvent(scope, rebindOnEvent) {
         var i, eventName;
         var fns = [];  // these will hold callbacks for removing listeners
 
         // set up the watchers if they exist
-        if (eventWatchers) {
-            for (i = 0; i < eventWatchers.length; i++) {
-                eventName = eventWatchers[i];
-                fns.push(eventBus.on(eventName, scope.recomputeModel));
+        if (rebindOnEvent) {
+            for (i = 0; i < rebindOnEvent.length; i++) {
+                eventName = rebindOnEvent[i];
+                fns.push(eventBus.on(eventName, scope.rebindModel));
             }
 
             // make sure handlers are destroyed along with scope
@@ -613,7 +613,7 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
         computeModelFn: computeModelFn,
         addValidations: addValidations,
         attachToScope: attachToScope,
-        rerenderOnWatch: rerenderOnWatch,
+        rebindOnScopeChange: rebindOnScopeChange,
         rerenderOnEvent: rerenderOnEvent,
         addInitModel: addInitModel,
         registerListeners: registerListeners,

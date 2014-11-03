@@ -91,7 +91,7 @@ describe('UNIT ' + name, function () {
                 attachToScope: 'null',
                 shouldRenderModel: false,
                 renderModelFn: null,
-                scopeWatchers: 'null',
+                rebindOnScopeChange: 'null',
                 eventBusListeners: null,
                 uiEventHandlers: null,
                 body: '\n\t                    return _.extend({}, val, moo);\n\t                '
