@@ -84,17 +84,26 @@ describe('UNIT ' + name, function () {
             var options = {};
 
             var expected = {
-                params: ['val', 'moo'],
-                convertedParams: ['val', 'moo'],
-                ngrefs: [],
-                defaults: 'null',
-                attachToScope: 'null',
-                shouldRenderModel: false,
-                renderModelFn: null,
-                rebindOnScopeChange: 'null',
-                eventBusListeners: null,
-                uiEventHandlers: null,
-                body: '\n\t                    return _.extend({}, val, moo);\n\t                '
+                params:             ['val', 'moo'],
+                convertedParams:    ['val', 'moo'],
+                ngrefs:             [],
+                defaults:           'null',
+                attachToScope:      'null',
+                rerenderExists:     undefined,
+                rebindExists:       undefined,
+                rebindFn:           null,
+                rebindWatchers:     'null',
+                rebindEvents:       'null',
+                rerenderWatchers:   'null',
+                rerenderEvents:     'null',
+                useRebindOnWatch:   undefined,
+                useRebindOnEvent:   undefined,
+                useRerenderOnWatch: undefined,
+                useRerenderOnEvent: undefined,
+                validations:        null,
+                eventBusListeners:  null,
+                uiEventHandlers:    null,
+                body:               '\n\t                    return _.extend({}, val, moo);\n\t                '
             };
 
             var actual = transformer.getCtrlTemplateModel.call(context, uipart, names, options);

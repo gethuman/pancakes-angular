@@ -119,6 +119,334 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
     };
 });
 
+///**
+// * Author: Jeff Whelpley
+// * Date: 11/3/14
+// *
+// *
+// */
+//(function () {
+//
+//    /**
+//     * Originally from Pasvaz/bindonce, but modified for our purposes (only boIf for now)
+//     *
+//     * Bindonce - Zero watches binding for AngularJs
+//     * @version v0.3.1
+//     * @link https://github.com/Pasvaz/bindonce
+//     * @author Pasquale Vazzana <pasqualevazzana@gmail.com>
+//     * @license MIT License, http://www.opensource.org/licenses/MIT
+//     */
+//
+//    var bindonceModule = angular.module('pancakesAngular');
+//
+//    bindonceModule.directive('bindonce', function ()
+//    {
+//        var toBoolean = function (value)
+//        {
+//            if (value && value.length !== 0)
+//            {
+//                var v = angular.lowercase("" + value);
+//                value = !(v === 'f' || v === '0' || v === 'false' || v === 'no' || v === 'n' || v === '[]');
+//            }
+//            else
+//            {
+//                value = false;
+//            }
+//            return value;
+//        };
+//
+//        //var msie = parseInt((/msie (\d+)/.exec(angular.lowercase(navigator.userAgent)) || [])[1], 10);
+//        //if (isNaN(msie))
+//        //{
+//        //    msie = parseInt((/trident\/.*; rv:(\d+)/.exec(angular.lowercase(navigator.userAgent)) || [])[1], 10);
+//        //}
+//
+//        var bindonceDirective =
+//        {
+//            restrict: "AM",
+//            controller: ['$scope', '$element', '$attrs', '$interpolate', function ($scope, $element, $attrs, $interpolate)
+//            {
+//                //var showHideBinder = function (elm, attr, value)
+//                //{
+//                //    var show = (attr === 'show') ? '' : 'none';
+//                //    var hide = (attr === 'hide') ? '' : 'none';
+//                //    elm.css('display', toBoolean(value) ? show : hide);
+//                //};
+//                //var classBinder = function (elm, value)
+//                //{
+//                //    if (angular.isObject(value) && !angular.isArray(value))
+//                //    {
+//                //        var results = [];
+//                //        angular.forEach(value, function (value, index)
+//                //        {
+//                //            if (value) { results.push(index); }
+//                //        });
+//                //        value = results;
+//                //    }
+//                //    if (value)
+//                //    {
+//                //        elm.addClass(angular.isArray(value) ? value.join(' ') : value);
+//                //    }
+//                //};
+//                var transclude = function (transcluder, scope)
+//                {
+//                    transcluder.transclude(scope, function (clone)
+//                    {
+//                        var parent = transcluder.element.parent();
+//                        var afterNode = transcluder.element && transcluder.element[transcluder.element.length - 1];
+//                        var parentNode = parent && parent[0] || afterNode && afterNode.parentNode;
+//                        var afterNextSibling = (afterNode && afterNode.nextSibling) || null;
+//                        angular.forEach(clone, function (node)
+//                        {
+//                            parentNode.insertBefore(node, afterNextSibling);
+//                        });
+//                    });
+//                };
+//
+//                var ctrl =
+//                {
+//                    watcherRemover: undefined,
+//                    binders: [],
+//                    group: $attrs.boName,
+//                    element: $element,
+//                    ran: false,
+//
+//                    addBinder: function (binder)
+//                    {
+//                        this.binders.push(binder);
+//
+//                        // In case of late binding (when using the directive bo-name/bo-parent)
+//                        // it happens only when you use nested bindonce, if the bo-children
+//                        // are not dom children the linking can follow another order
+//                        if (this.ran)
+//                        {
+//                            this.runBinders();
+//                        }
+//                    },
+//
+//                    setupWatcher: function (bindonceValue)
+//                    {
+//                        var that = this;
+//                        this.watcherRemover = $scope.$watch(bindonceValue, function (newValue)
+//                        {
+//                            if (newValue === undefined) { return; }
+//                            that.removeWatcher();
+//                            that.checkBindonce(newValue);
+//                        }, true);
+//                    },
+//
+//                    checkBindonce: function (value)
+//                    {
+//                        var that = this, promise = (value.$promise) ? value.$promise.then : value.then;
+//                        // since Angular 1.2 promises are no longer
+//                        // undefined until they don't get resolved
+//                        if (typeof promise === 'function')
+//                        {
+//                            promise(function ()
+//                            {
+//                                that.runBinders();
+//                            });
+//                        }
+//                        else
+//                        {
+//                            that.runBinders();
+//                        }
+//                    },
+//
+//                    removeWatcher: function ()
+//                    {
+//                        if (this.watcherRemover !== undefined)
+//                        {
+//                            this.watcherRemover();
+//                            this.watcherRemover = undefined;
+//                        }
+//                    },
+//
+//                    runBinders: function ()
+//                    {
+//                        while (this.binders.length > 0)
+//                        {
+//                            var binder = this.binders.shift();
+//                            if (this.group && this.group !== binder.group) { continue; }
+//                            var value = binder.scope.$eval((binder.interpolate) ? $interpolate(binder.value) : binder.value);
+//                            switch (binder.attr)
+//                            {
+//                                case 'boIf':
+//                                    if (toBoolean(value))
+//                                    {
+//                                        transclude(binder, binder.scope.$new());
+//                                    }
+//                                    break;
+//                                //case 'boSwitch':
+//                                //    var selectedTranscludes, switchCtrl = binder.controller[0];
+//                                //    if ((selectedTranscludes = switchCtrl.cases['!' + value] || switchCtrl.cases['?']))
+//                                //    {
+//                                //        binder.scope.$eval(binder.attrs.change);
+//                                //        angular.forEach(selectedTranscludes, function (selectedTransclude)
+//                                //        {
+//                                //            transclude(selectedTransclude, binder.scope.$new());
+//                                //        });
+//                                //    }
+//                                //    break;
+//                                //case 'boSwitchWhen':
+//                                //    var ctrl = binder.controller[0];
+//                                //    ctrl.cases['!' + binder.attrs.boSwitchWhen] = (ctrl.cases['!' + binder.attrs.boSwitchWhen] || []);
+//                                //    ctrl.cases['!' + binder.attrs.boSwitchWhen].push({ transclude: binder.transclude, element: binder.element });
+//                                //    break;
+//                                //case 'boSwitchDefault':
+//                                //    var ctrl = binder.controller[0];
+//                                //    ctrl.cases['?'] = (ctrl.cases['?'] || []);
+//                                //    ctrl.cases['?'].push({ transclude: binder.transclude, element: binder.element });
+//                                //    break;
+//                                //case 'hide':
+//                                //case 'show':
+//                                //    showHideBinder(binder.element, binder.attr, value);
+//                                //    break;
+//                                //case 'class':
+//                                //    classBinder(binder.element, value);
+//                                //    break;
+//                                //case 'text':
+//                                //    binder.element.text(value);
+//                                //    break;
+//                                //case 'html':
+//                                //    binder.element.html(value);
+//                                //    break;
+//                                //case 'style':
+//                                //    binder.element.css(value);
+//                                //    break;
+//                                //case 'src':
+//                                //    binder.element.attr(binder.attr, value);
+//                                //    if (msie) binder.element.prop('src', value);
+//                                //    break;
+//                                //case 'attr':
+//                                //    angular.forEach(binder.attrs, function (attrValue, attrKey)
+//                                //    {
+//                                //        var newAttr, newValue;
+//                                //        if (attrKey.match(/^boAttr./) && binder.attrs[attrKey])
+//                                //        {
+//                                //            newAttr = attrKey.replace(/^boAttr/, '').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+//                                //            newValue = binder.scope.$eval(binder.attrs[attrKey]);
+//                                //            binder.element.attr(newAttr, newValue);
+//                                //        }
+//                                //    });
+//                                //    break;
+//                                //case 'href':
+//                                //case 'alt':
+//                                //case 'title':
+//                                //case 'id':
+//                                //case 'value':
+//                                //    binder.element.attr(binder.attr, value);
+//                                //    break;
+//                            }
+//                        }
+//                        this.ran = true;
+//                    }
+//                };
+//
+//                angular.extend(this, ctrl);
+//            }],
+//
+//            link: function (scope, elm, attrs, bindonceController)
+//            {
+//                var value = attrs.bindonce && scope.$eval(attrs.bindonce);
+//                if (value !== undefined)
+//                {
+//                    bindonceController.checkBindonce(value);
+//                }
+//                else
+//                {
+//                    bindonceController.setupWatcher(attrs.bindonce);
+//                    elm.bind("$destroy", bindonceController.removeWatcher);
+//                }
+//            }
+//        };
+//
+//        return bindonceDirective;
+//    });
+//
+//    angular.forEach(
+//        [
+//            //{ directiveName: 'boShow', attribute: 'show' },
+//            //{ directiveName: 'boHide', attribute: 'hide' },
+//            //{ directiveName: 'boClass', attribute: 'class' },
+//            //{ directiveName: 'boText', attribute: 'text' },
+//            //{ directiveName: 'boBind', attribute: 'text' },
+//            //{ directiveName: 'boHtml', attribute: 'html' },
+//            //{ directiveName: 'boSrcI', attribute: 'src', interpolate: true },
+//            //{ directiveName: 'boSrc', attribute: 'src' },
+//            //{ directiveName: 'boHrefI', attribute: 'href', interpolate: true },
+//            //{ directiveName: 'boHref', attribute: 'href' },
+//            //{ directiveName: 'boAlt', attribute: 'alt' },
+//            //{ directiveName: 'boTitle', attribute: 'title' },
+//            //{ directiveName: 'boId', attribute: 'id' },
+//            //{ directiveName: 'boStyle', attribute: 'style' },
+//            //{ directiveName: 'boValue', attribute: 'value' },
+//            //{ directiveName: 'boAttr', attribute: 'attr' },
+//
+//            { directiveName: 'boIf', transclude: 'element', terminal: true, priority: 1000 }
+//            //{ directiveName: 'boSwitch', require: 'boSwitch', controller: function () { this.cases = {}; } },
+//            //{ directiveName: 'boSwitchWhen', transclude: 'element', priority: 800, require: '^boSwitch' },
+//            //{ directiveName: 'boSwitchDefault', transclude: 'element', priority: 800, require: '^boSwitch' }
+//        ],
+//        function (boDirective)
+//        {
+//            var childPriority = 200;
+//            return bindonceModule.directive(boDirective.directiveName, function ()
+//            {
+//                var bindonceDirective =
+//                {
+//                    priority: boDirective.priority || childPriority,
+//                    transclude: boDirective.transclude || false,
+//                    terminal: boDirective.terminal || false,
+//                    require: ['^bindonce'].concat(boDirective.require || []),
+//                    controller: boDirective.controller,
+//                    compile: function (tElement, tAttrs, transclude)
+//                    {
+//                        return function (scope, elm, attrs, controllers)
+//                        {
+//                            var bindonceController = controllers[0];
+//                            var name = attrs.boParent;
+//                            if (name && bindonceController.group !== name)
+//                            {
+//                                var element = bindonceController.element.parent();
+//                                bindonceController = undefined;
+//                                var parentValue;
+//
+//                                while (element[0].nodeType !== 9 && element.length)
+//                                {
+//                                    if ((parentValue = element.data('$bindonceController')) && parentValue.group === name)
+//                                    {
+//                                        bindonceController = parentValue;
+//                                        break;
+//                                    }
+//                                    element = element.parent();
+//                                }
+//                                if (!bindonceController)
+//                                {
+//                                    throw new Error("No bindonce controller: " + name);
+//                                }
+//                            }
+//
+//                            bindonceController.addBinder(
+//                                {
+//                                    element: elm,
+//                                    attr: boDirective.attribute || boDirective.directiveName,
+//                                    attrs: attrs,
+//                                    value: attrs[boDirective.directiveName],
+//                                    interpolate: boDirective.interpolate,
+//                                    group: name,
+//                                    transclude: transclude,
+//                                    controller: controllers.slice(1),
+//                                    scope: scope
+//                                });
+//                        };
+//                    }
+//                };
+//
+//                return bindonceDirective;
+//            });
+//        });
+//})();
 /**
  * Author: Jeff Whelpley
  * Date: 10/24/14
@@ -214,7 +542,7 @@ angular.module('pancakesAngular').factory('config', function () {
                 // if we are binding to the attribute value
                 if (isBind) {
                     var unwatch = scope.$watch(originalValue, function (value) {
-                        if (value) {
+                        if (value !== undefined && value !== null) {
                             value = filterType === 'file' ?
                                 config.staticFileRoot + value :
                                 i18n.translate(value);
@@ -432,7 +760,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  * This has utilities that are used to help work with generated
  * template code
  */
-angular.module('pancakesAngular').factory('tplHelper', function ($injector, pageSettings, eventBus) {
+angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, $state, pageSettings, eventBus) {
 
     /**
      * Given a set of default values, add them to the scope if
@@ -452,17 +780,47 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
     }
 
     /**
-     * This is used to re-render the model (wrapped in a fn so we can pass into watch and eventBus)
+     * This will generate a re-render function for pages. Partials don't need this because
+     * re-render is defined in the directive link function. See ng.uipart.template.
      *
      * @param scope
+     */
+    function generateRerender(scope) {
+        scope.rerenderComponent = function () {
+            $state.go($state.current, {}, {reload: true});
+        };
+    }
+
+    /**
+     * Add a function to the scope that will re-call the model() function for
+     * a given uipart. This function is different for pages and partials because
+     * pages are async and return a promise while partials are functions that
+     * simply modify the model. Also, for partials, we want to call the rebind
+     * right away, but for pages it has already been called by the UI router.
+     *
+     * @param scope
+     * @param isPage
      * @param fn
      */
-    function computeModelFn(scope, fn) {
+    function generateRebind(scope, isPage, fn) {
         if (!fn) { return; }
 
-        var computeModel = $injector.invoke(fn);
-        scope.rebindModel = function () { computeModel(scope); };
-        scope.rebindModel();
+        if (isPage) {
+            scope.rebindModel = function () {
+                return $q.when($injector.invoke(fn))
+                    .then(function (model) {
+                        return angular.extend(scope, model);
+                    });
+            };
+        }
+        else {
+            var computeModel = $injector.invoke(fn);
+            scope.rebindModel = function () {
+                computeModel(scope);
+                return scope;
+            };
+            scope.rebindModel();
+        }
     }
 
     /**
@@ -498,31 +856,20 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
     }
 
     /**
-     * Create the render model function, execute it and set up
-     * watchers for when it should be re-rendered.
-     *
-     * @param scope
-     * @param rebindOnScopeChange
+     * Generate a handler for a given callback
+     * @param cb
+     * @returns {Function}
      */
-    function rebindOnScopeChange(scope, rebindOnScopeChange) {
-        var i, watchExp, firstChar;
-
-        // set up the watchers if they exist
-        if (rebindOnScopeChange) {
-            for (i = 0; i < rebindOnScopeChange.length; i++) {
-                watchExp = rebindOnScopeChange[i];
-                firstChar = watchExp.charAt(0);
-                if (firstChar === '^') {
-                    scope.$watchCollection(watchExp.substring(1), scope.rebindModel);
-                }
-                else if (firstChar === '*') {
-                    scope.$watch(watchExp.substring(1), scope.rebindModel, true);
-                }
-                else {
-                    scope.$watch(watchExp, scope.rebindModel);
-                }
+    function generateScopeChangeHandler(cb) {
+        var firstTime = true;
+        return function () {
+            if (firstTime) {
+                firstTime = false;
             }
-        }
+            else {
+                cb();
+            }
+        };
     }
 
     /**
@@ -530,17 +877,85 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
      * watchers for when it should be re-rendered.
      *
      * @param scope
-     * @param rebindOnEvent
+     * @param watchers
+     * @param cb Callback when scope changes
      */
-    function rerenderOnEvent(scope, rebindOnEvent) {
+    function doOnScopeChange(scope, watchers, cb) {
+        var i, watchExp, firstChar, handler;
+
+        // set up the watchers if they exist
+        if (watchers && cb) {
+            for (i = 0; i < watchers.length; i++) {
+                handler = generateScopeChangeHandler(cb);
+                watchExp = watchers[i];
+                firstChar = watchExp.charAt(0);
+                if (firstChar === '^') {
+                    scope.$watchCollection(watchExp.substring(1), handler);
+                }
+                else if (firstChar === '*') {
+                    scope.$watch(watchExp.substring(1), handler, true);
+                }
+                else {
+                    scope.$watch(watchExp, handler);
+                }
+            }
+        }
+    }
+
+    /**
+     * When rerendering, we need to make sure the model is rebound as well (if the
+     * rebinding fn exists).
+     *
+     * @param scope
+     * @returns {Function}
+     */
+    function generateRerenderCallback(scope) {
+        return function () {
+            var rebindModel = scope.rebindModel || function () { return true; };
+            $q.when(rebindModel(scope))
+                .then(function () {
+                    scope.rerenderComponent();
+                });
+        };
+    }
+
+    /**
+     * Re-bind the model when the scope changes
+     * @param scope
+     * @param watchers
+     * @returns {*}
+     */
+    function rebindOnScopeChange(scope, watchers) {
+        return doOnScopeChange(scope, watchers, scope.rebindModel);
+    }
+
+    /**
+     * Re-render the component (i.e. directive) when the scope changes
+     * @param scope
+     * @param watchers
+     * @returns {*}
+     */
+    function rerenderOnScopeChange(scope, watchers) {
+        return doOnScopeChange(scope, watchers, generateRerenderCallback(scope));
+    }
+
+    /**
+     * Create the render model function, execute it and set up
+     * watchers for when it should be re-rendered.
+     *
+     * @param scope
+     * @param events
+     * @param cb Callback when event occurs
+     */
+    function doOnEvent(scope, events, cb) {
         var i, eventName;
         var fns = [];  // these will hold callbacks for removing listeners
 
         // set up the watchers if they exist
-        if (rebindOnEvent) {
-            for (i = 0; i < rebindOnEvent.length; i++) {
-                eventName = rebindOnEvent[i];
-                fns.push(eventBus.on(eventName, scope.rebindModel));
+        if (events && cb) {
+            for (i = 0; i < events.length; i++) {
+                eventName = events[i];
+                fns.push(eventBus.on(eventName, cb));
             }
 
             // make sure handlers are destroyed along with scope
@@ -550,6 +965,26 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
                 }
             });
         }
+    }
+
+    /**
+     * Re-bind the model when there is an event
+     * @param scope
+     * @param events
+     * @returns {*}
+     */
+    function rebindOnEvent(scope, events) {
+        return doOnEvent(scope, events, scope.rebindModel);
+    }
+
+    /**
+     * Re-render the component (i.e. directive) when there is an event
+     * @param scope
+     * @param events
+     * @returns {*}
+     */
+    function rerenderOnEvent(scope, events) {
+        return doOnEvent(scope, events, generateRerenderCallback(scope));
     }
 
     /**
@@ -610,11 +1045,18 @@ angular.module('pancakesAngular').factory('tplHelper', function ($injector, page
     // expose functions
     return {
         setDefaults: setDefaults,
-        computeModelFn: computeModelFn,
+        generateRerender: generateRerender,
+        generateRebind: generateRebind,
         addValidations: addValidations,
         attachToScope: attachToScope,
-        rebindOnScopeChange: rebindOnScopeChange,
+        generateRerenderCallback: generateRerenderCallback,
+        rerenderOnScopeChange: rerenderOnScopeChange,
         rerenderOnEvent: rerenderOnEvent,
+        rebindOnScopeChange: rebindOnScopeChange,
+        rebindOnEvent: rebindOnEvent,
+        generateScopeChangeHandler: generateScopeChangeHandler,
+        doOnScopeChange: doOnScopeChange,
+        doOnEvent: doOnEvent,
         addInitModel: addInitModel,
         registerListeners: registerListeners,
         addEventHandlers: addEventHandlers

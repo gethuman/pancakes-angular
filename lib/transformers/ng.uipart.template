@@ -12,7 +12,7 @@ angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
             ,
             scope: {{=it.directiveScope}}
             {{?}}
-            {{? it.useRerenderOnWatch || it.useRerenderOnEvent }}
+            {{? it.rerenderExists }}
             ,
             link: function (scope, element, attr) {
                 scope.rerenderComponent = function () {
@@ -26,8 +26,8 @@ angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
 {{?}}
 
 angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
-    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', 'tplHelper',
-    function ({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, tplHelper) {
+    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', '$state', 'tplHelper',
+    function ({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, $state, tplHelper) {
 
         {{~it.ngrefs :param}}
         var {{=param}} = angular;
@@ -37,7 +37,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.attachToScope     }}tplHelper.attachToScope($scope, {{=it.attachToScope}});{{?}}
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
 
-        {{? it.rerenderExists    }}tplHelper.generateRerender($scope);{{?}}
+        {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}
         {{? it.rebindExists      }}tplHelper.generateRebind($scope, {{=it.isPage}}, {{=it.rebindFn}});{{?}}
         {{? it.useRebindOnWatch  }}tplHelper.rebindOnScopeChange($scope, {{=it.rebindWatchers}});{{?}}
         {{? it.useRebindOnEvent  }}tplHelper.rebindOnEvent($scope, {{=it.rebindEvents}});{{?}}
