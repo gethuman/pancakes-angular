@@ -760,7 +760,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  * This has utilities that are used to help work with generated
  * template code
  */
-angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, $state, pageSettings, eventBus) {
+angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, pageSettings, eventBus) {
 
     /**
      * Given a set of default values, add them to the scope if
@@ -784,8 +784,11 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
      * re-render is defined in the directive link function. See ng.uipart.template.
      *
      * @param scope
+     * @param $state This is from the UI router, but we don't want a dependency on UI router at this level, so pass it in from app
      */
-    function generateRerender(scope) {
+    function generateRerender(scope, $state) {
+        if (!$state) { return; }
+
         scope.rerenderComponent = function () {
             $state.go($state.current, {}, {reload: true});
         };
