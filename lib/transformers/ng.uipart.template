@@ -38,7 +38,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
 
         {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}
-        {{? it.rebindExists      }}tplHelper.generateRebind($scope, {{=it.isPage}}, {{=it.rebindFn}});{{?}}
+        {{? it.rebindExists      }}tplHelper.generateRebind($scope, {{=it.isPartial}}, {{=it.rebindFn}});{{?}}
         {{? it.useRebindOnWatch  }}tplHelper.rebindOnScopeChange($scope, {{=it.rebindWatchers}});{{?}}
         {{? it.useRebindOnEvent  }}tplHelper.rebindOnEvent($scope, {{=it.rebindEvents}});{{?}}
         {{? it.useRerenderOnWatch}}tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});{{?}}

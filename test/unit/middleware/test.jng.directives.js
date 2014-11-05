@@ -43,10 +43,8 @@ describe('UNIT ' + name, function () {
 
     describe('modifyModel()', function () {
         var model = { foo: 'boo' };
-        var modelFlapjack = function () {
-            return function (model) {
-                model.another = 'yes';
-            };
+        var modelFlapjack = function (model) {
+            model.another = 'yes';
         };
         var expected = { foo: 'boo', another: 'yes' };
         jng.modifyModel.call(context, model, modelFlapjack);
