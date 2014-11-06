@@ -492,6 +492,9 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
         $document.bind(eventName, callback);
     };
 
+    eventBus.blah = 'yes';
+    eventBus.boo = (new Date()).getTime();
+
     return eventBus;
 });
 
@@ -772,6 +775,9 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
     function setDefaults(scope, defaults) {
         if (!defaults) { return; }
 
+        // store defaults for use in generateRemodel
+        scope.defaults = defaults;
+
         for (var name in defaults) {
             if (defaults.hasOwnProperty(name) && scope[name] === undefined) {
                 scope[name] = defaults[name];
@@ -798,32 +804,27 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
      * Add a function to the scope that will re-call the model() function for
      * a given uipart. This function is different for pages and partials because
      * pages are async and return a promise while partials are functions that
-     * simply modify the model. Also, for partials, we want to call the rebind
+     * simply modify the model. Also, for partials, we want to call the remodel
      * right away, but for pages it has already been called by the UI router.
      *
      * @param scope
-     * @param isPage
+     * @param isPartial
      * @param fn
      */
-    function generateRebind(scope, isPage, fn) {
+    function generateRemodel(scope, isPartial, fn) {
         if (!fn) { return; }
 
-        if (isPage) {
-            scope.rebindModel = function () {
-                return $q.when($injector.invoke(fn))
-                    .then(function (model) {
-                        return angular.extend(scope, model);
-                    });
-            };
-        }
-        else {
-            var computeModel = $injector.invoke(fn);
-            scope.rebindModel = function () {
-                computeModel(scope);
-                return scope;
-            };
-            scope.rebindModel();
-        }
+        // remodeling will call the model function
+        scope.remodel = function () {
+            var locals = { model: scope, defaults: scope.defaults };
+            return $q.when($injector.invoke(fn, null, locals))
+                .then(function (model) {
+                    return angular.extend(scope, model);
+                });
+        };
+
+        // for partials, we want to remodel right away
+        if (isPartial) { scope.remodel(); }
     }
 
     /**
@@ -907,15 +908,15 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
 
     /**
      * When rerendering, we need to make sure the model is rebound as well (if the
-     * rebinding fn exists).
+     * remodeling fn exists).
      *
      * @param scope
      * @returns {Function}
      */
     function generateRerenderCallback(scope) {
         return function () {
-            var rebindModel = scope.rebindModel || function () { return true; };
-            $q.when(rebindModel(scope))
+            var remodel = scope.remodel || function () { return true; };
+            $q.when(remodel(scope))
                 .then(function () {
                     scope.rerenderComponent();
                 });
@@ -928,8 +929,8 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
      * @param watchers
      * @returns {*}
      */
-    function rebindOnScopeChange(scope, watchers) {
-        return doOnScopeChange(scope, watchers, scope.rebindModel);
+    function remodelOnScopeChange(scope, watchers) {
+        return doOnScopeChange(scope, watchers, scope.remodel);
     }
 
     /**
@@ -976,8 +977,8 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
      * @param events
      * @returns {*}
      */
-    function rebindOnEvent(scope, events) {
-        return doOnEvent(scope, events, scope.rebindModel);
+    function remodelOnEvent(scope, events) {
+        return doOnEvent(scope, events, scope.remodel);
     }
 
     /**
@@ -1049,14 +1050,14 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
     return {
         setDefaults: setDefaults,
         generateRerender: generateRerender,
-        generateRebind: generateRebind,
+        generateRemodel: generateRemodel,
         addValidations: addValidations,
         attachToScope: attachToScope,
         generateRerenderCallback: generateRerenderCallback,
         rerenderOnScopeChange: rerenderOnScopeChange,
         rerenderOnEvent: rerenderOnEvent,
-        rebindOnScopeChange: rebindOnScopeChange,
-        rebindOnEvent: rebindOnEvent,
+        remodelOnScopeChange: remodelOnScopeChange,
+        remodelOnEvent: remodelOnEvent,
         generateScopeChangeHandler: generateScopeChangeHandler,
         doOnScopeChange: doOnScopeChange,
         doOnEvent: doOnEvent,
