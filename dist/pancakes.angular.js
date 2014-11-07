@@ -711,21 +711,14 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
         return service;
     }
 
-    /**
-     * Generate a method for the model. This will wrap the underlying
-     * service method and save/update data in the model store.
-     *
-     * @param methodName
-     * @param serviceMethod
-     */
-    function genModelMethod(methodName, serviceMethod) {
-        return function (req) {
-
-            //TODO: potentially some stuff here for the server method wrapper
-
-            return serviceMethod(req);
-        };
-    }
+    //function genModelMethod(methodName, serviceMethod) {
+    //    return function (req) {
+    //
+    //        // in the future we may
+    //
+    //        return serviceMethod(req);
+    //    };
+    //}
 
     /**
      * Generate a model off the service
@@ -741,17 +734,20 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
                 service.create({ data: this.data });
         };
 
-        for (var methodName in service) {
-            if (service.hasOwnProperty(methodName)) {
-                model[methodName] = genModelMethod(methodName, service[methodName]);
-            }
-        }
+        angular.extend(model, service);
+
+        //for (var methodName in service) {
+        //    if (service.hasOwnProperty(methodName)) {
+        //        model[methodName] = genModelMethod(methodName, service[methodName]);
+        //    }
+        //}
 
         return model;
     }
 
     // expose functions
     return {
+        genServiceMethod: genServiceMethod,
         genService: genService,
         genModel: genModel
     };
