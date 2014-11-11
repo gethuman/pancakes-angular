@@ -27,14 +27,6 @@ describe('UNIT ' + name, function () {
             jng.setDefaults.call(context, model, defaults);
             model.should.deep.equal(defaults);
         });
-
-        it('should not overwrite value that already there', function () {
-            var model = { one: 'zoo' };
-            var defaults = { one: 'foo', two: 'choo' };
-            var expected = { one: 'zoo', two: 'choo' };
-            jng.setDefaults.call(context, model, defaults);
-            model.should.deep.equal(expected);
-        });
     });
 
     describe('attachToScope()', function () {

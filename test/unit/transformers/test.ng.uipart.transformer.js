@@ -91,7 +91,6 @@ describe('UNIT ' + name, function () {
                 attachToScope:      'null',
                 rerenderExists:     undefined,
                 remodelExists:      undefined,
-                remodelFn:          null,
                 remodelWatchers:    'null',
                 remodelEvents:      'null',
                 rerenderWatchers:   'null',
@@ -107,7 +106,8 @@ describe('UNIT ' + name, function () {
             };
 
             var actual = transformer.getCtrlTemplateModel.call(context, uipart, names, options);
-            actual.should.deep.equal(expected);
+            //actual.should.deep.equal(expected);
+            JSON.stringify(actual).should.equal(JSON.stringify(expected));
         });
     });
 

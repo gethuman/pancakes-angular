@@ -41,13 +41,13 @@ describe('UNIT ' + name, function () {
         });
     });
 
-    describe('modifyModel()', function () {
+    describe('evalModel()', function () {
         var model = { foo: 'boo' };
-        var modelFlapjack = function (model) {
-            model.another = 'yes';
+        var modelFlapjack = function () {
+            return { another: 'yes' };
         };
         var expected = { foo: 'boo', another: 'yes' };
-        jng.modifyModel.call(context, model, modelFlapjack);
+        jng.evalModel.call(context, model, {}, modelFlapjack);
         model.should.deep.equal(expected);
     });
 

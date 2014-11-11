@@ -38,7 +38,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
 
         {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}
-        {{? it.remodelExists     }}tplHelper.generateRemodel($scope, {{=it.isPartial}}, {{=it.remodelFn}});{{?}}
+        {{? it.remodelFnExists   }}tplHelper.generateRemodel($scope, '{{=it.controllerName}}', {{=it.isPartial}}, {{=it.remodelFn}}, {{=it.directiveScope}});{{?}}
         {{? it.useRemodelOnWatch }}tplHelper.remodelOnScopeChange($scope, {{=it.remodelWatchers}});{{?}}
         {{? it.useRemodelOnEvent }}tplHelper.remodelOnEvent($scope, {{=it.remodelEvents}});{{?}}
         {{? it.useRerenderOnWatch}}tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});{{?}}
@@ -62,6 +62,12 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{ } }}
             end: null
         });{{?}}
+        {{? it.remodelObjExists  }}tplHelper.generateRemodel($scope, '{{=it.controllerName}}', {{=it.isPartial}}, {
+        {{ for (var rName in it.remodelObj) { }}
+            '{{=rName}}': {{=it.remodelObj[rName]}},
+        {{ } }}
+            end: null
+        }, {{=it.directiveScope}});{{?}}
 
         {{=it.body}}
     }

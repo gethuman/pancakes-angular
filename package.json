@@ -1,6 +1,6 @@
 {
   "name": "pancakes-angular",
-  "version": "0.1.16",
+  "version": "0.1.20",
   "description": "Pancakes plugin for Angular",
   "main": "lib/pancakes.angular.plugin.js",
   "repository": {
@@ -20,14 +20,14 @@
   },
   "homepage": "https://github.com/gethuman/pancakes-angular",
   "dependencies": {
-    "jangular": "^0.1.12",
+    "jangular": "^0.1.20",
     "lodash": "~2.4.1",
     "lru-cache": "^2.5.0",
-    "pancakes": "^0.1.15",
-    "q": "^1.0.1"
+    "pancakes": "^0.1.20",
+    "q": "^1.1.1"
   },
   "devDependencies": {
-    "angular": "^1.3.1",
+    "angular": "^1.3.2",
     "dot": "^1.0.2",
     "gulp": "^3.8.10",
     "gulp-concat": "^2.4.1",
@@ -36,6 +36,6 @@
     "gulp-uglify": "^1.0.1",
     "jshint": "^2.5.10",
     "prettyjson": "^1.0.0",
-    "taste": "^0.1.12"
+    "taste": "^0.1.20"
   }
 }
