@@ -36,13 +36,8 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.defaults          }}tplHelper.setDefaults($scope, {{=it.defaults}});{{?}}
         {{? it.attachToScope     }}tplHelper.attachToScope($scope, {{=it.attachToScope}});{{?}}
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
-
         {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}
         {{? it.remodelFnExists   }}tplHelper.generateRemodel($scope, '{{=it.controllerName}}', {{=it.isPartial}}, {{=it.remodelFn}}, {{=it.directiveScope}});{{?}}
-        {{? it.useRemodelOnWatch }}tplHelper.remodelOnScopeChange($scope, {{=it.remodelWatchers}});{{?}}
-        {{? it.useRemodelOnEvent }}tplHelper.remodelOnEvent($scope, {{=it.remodelEvents}});{{?}}
-        {{? it.useRerenderOnWatch}}tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});{{?}}
-        {{? it.useRerenderOnEvent}}tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});{{?}}
 
         {{? it.eventBusListeners }}tplHelper.registerListeners($scope, {
         {{ for (var lName in it.eventBusListeners) { }}
@@ -50,7 +45,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{ } }}
             end: null
         });{{?}}
-        {{? it.uiEventHandlers   }}tplHelper.addEventHandlers($scope, {
+        {{? it.uiEventHandlers   }}tplHelper.addEventHandlers($scope, '{{=it.controllerName}}', {
         {{ for (var uName in it.uiEventHandlers) { }}
             '{{=uName}}': {{=it.uiEventHandlers[uName]}},
         {{ } }}
@@ -68,6 +63,11 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{ } }}
             end: null
         }, {{=it.directiveScope}});{{?}}
+
+        {{? it.useRemodelOnWatch }}tplHelper.remodelOnScopeChange($scope, {{=it.remodelWatchers}});{{?}}
+        {{? it.useRemodelOnEvent }}tplHelper.remodelOnEvent($scope, {{=it.remodelEvents}});{{?}}
+        {{? it.useRerenderOnWatch}}tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});{{?}}
+        {{? it.useRerenderOnEvent}}tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});{{?}}
 
         {{=it.body}}
     }
