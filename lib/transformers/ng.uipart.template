@@ -3,7 +3,6 @@
 angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
     '$compile', function ($compile) {
         return {
-            restict:        'A',
             replace:        true,
             templateUrl:    '{{=it.viewUrl}}',
             controller:     '{{=it.controllerName}}'
