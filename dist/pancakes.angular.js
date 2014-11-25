@@ -6,6 +6,8 @@
  */
 angular.module('pancakesAngular', []);
 
+/* jshint undef: false */
+
 // this little hack is used to fix issue with facebook social auth
 // TODO: put this someplace better, but won't hurt to have it here for now
 // really, this belongs in security plugin once I get to those
@@ -846,7 +848,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  * This has utilities that are used to help work with generated
  * template code
  */
-angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, pageSettings, eventBus) {
+angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, config, pageSettings, eventBus) {
 
     /**
      * Given a set of default values, add them to the scope if
@@ -864,6 +866,33 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
         for (var name in defaults) {
             if (defaults.hasOwnProperty(name) && scope[name] === undefined) {
                 scope[name] = defaults[name];
+            }
+        }
+    }
+
+    /**
+     * Set options if they exist. Only can override defaults, though, so
+     * if no defaults value, then error thrown.
+     * This matches jng.utils.setOptions()
+     *
+     * @param scope
+     * @param defaults
+     * @param options
+     */
+    function setOptions(scope, defaults, options) {
+        if (!scope || !scope.optgrp || !options) { return; }
+
+        var opts = options[scope.optgrp] || options[scope.type + '.' + scope.optgrp];
+        if (!opts) { return; }
+
+        for (var name in opts) {
+            if (opts.hasOwnProperty(name)) {
+                if (!defaults || defaults[name] === undefined) {
+                    throw new Error('No defaults value for ' + name + ' but in options.' + scope.optgrp);
+                }
+                else {
+                    scope[name] = opts[name];
+                }
             }
         }
     }
@@ -902,7 +931,10 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
 
         // remodeling will call the model function
         scope.remodel = function () {
-            var locals = { currentScope: scope, defaults: scope.defaults };
+            var locals = {
+                currentScope:   scope,
+                defaults:       scope.defaults
+            };
 
             try {
 
@@ -1188,6 +1220,7 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
     // expose functions
     return {
         setDefaults: setDefaults,
+        setOptions: setOptions,
         generateRerender: generateRerender,
         generateRemodel: generateRemodel,
         addValidations: addValidations,
