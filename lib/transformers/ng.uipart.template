@@ -33,7 +33,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{~}}
 
         {{? it.defaults          }}tplHelper.setDefaults($scope, {{=it.defaults}});{{?}}
-        {{? it.options           }}tplHelper.setOptions($scope, {{=it.defaults}}, {{=it.options}});{{?}}
+        {{? it.presets           }}tplHelper.applyPresets($scope, {{=it.defaults}}, {{=it.presets}});{{?}}
         {{? it.attachToScope     }}tplHelper.attachToScope($scope, {{=it.attachToScope}});{{?}}
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
         {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}

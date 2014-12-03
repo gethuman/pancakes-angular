@@ -547,55 +547,58 @@ angular.module('pancakesAngular').factory('config', function () {
     // function used for each of the generic directives
     function addDirective(directiveName, attrName, filterType, isBind, isBindOnce) {
         app.directive(directiveName, ['i18n', 'config', function (i18n, config) {
-            return function (scope, element, attrs) {
-                var originalValue = attrs[directiveName];
+            return {
+                priority: 101,
+                link: function linkFn(scope, element, attrs) {
+                    var originalValue = attrs[directiveName];
 
-                // if we are binding to the attribute value
-                if (isBind) {
-                    var unwatch = scope.$watch(originalValue, function (value) {
-                        if (value !== undefined && value !== null) {
-                            value = filterType === 'file' ?
+                    // if we are binding to the attribute value
+                    if (isBind) {
+                        var unwatch = scope.$watch(originalValue, function (value) {
+                            if (value !== undefined && value !== null) {
+                                value = filterType === 'file' ?
                                 config.staticFileRoot + value :
-                                i18n.translate(value);
+                                    i18n.translate(value);
 
-                            attrName === 'text' ?
-                                element.text(value) :
-                                attrName === 'class' ?
-                                    attrs.$addClass(value) :
-                                    attrs.$set(attrName, value, scope);
+                                attrName === 'text' ?
+                                    element.text(value) :
+                                    attrName === 'class' ?
+                                        attrs.$addClass(value) :
+                                        attrs.$set(attrName, value, scope);
 
-                            // if bind once, we are unwatch after the first time
-                            if (isBindOnce && unwatch) { unwatch(); }
-                        }
-                    });
-                }
-
-                // else we are not binding, but we want to do some filtering
-                else if (!isBind && filterType !== null) {
-
-                    // if the value contains {{ it means there is interpolation
-                    if (originalValue.indexOf('{{') >= 0) {
-                        var unobserve = attrs.$observe(directiveName, function (value) {
-                            value = filterType === 'file' ?
-                                config.staticFileRoot + value :
-                                i18n.translate(value, scope);
-
-                            attrName === 'text' ?
-                                element.text(value) :
-                                attrs.$set(attrName, value, scope);
-
-                            if (isBindOnce && unobserve) { unobserve(); }
+                                // if bind once, we are unwatch after the first time
+                                if (isBindOnce && unwatch) { unwatch(); }
+                            }
                         });
                     }
-                    // else we are very simply setting the value
-                    else {
-                        var targetValue = filterType === 'file' ?
-                            config.staticFileRoot + originalValue :
-                            i18n.translate(originalValue);
 
-                        attrName === 'text' ?
-                            element.text(targetValue) :
-                            attrs.$set(attrName, targetValue, scope);
+                    // else we are not binding, but we want to do some filtering
+                    else if (!isBind && filterType !== null) {
+
+                        // if the value contains {{ it means there is interpolation
+                        if (originalValue.indexOf('{{') >= 0) {
+                            var unobserve = attrs.$observe(directiveName, function (value) {
+                                value = filterType === 'file' ?
+                                config.staticFileRoot + value :
+                                    i18n.translate(value, scope);
+
+                                attrName === 'text' ?
+                                    element.text(value) :
+                                    attrs.$set(attrName, value, scope);
+
+                                if (isBindOnce && unobserve) { unobserve(); }
+                            });
+                        }
+                        // else we are very simply setting the value
+                        else {
+                            var targetValue = filterType === 'file' ?
+                            config.staticFileRoot + originalValue :
+                                i18n.translate(originalValue);
+
+                            attrName === 'text' ?
+                                element.text(targetValue) :
+                                attrs.$set(attrName, targetValue, scope);
+                        }
                     }
                 }
             };
@@ -873,22 +876,24 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
     /**
      * Set options if they exist. Only can override defaults, though, so
      * if no defaults value, then error thrown.
-     * This matches jng.utils.setOptions()
+     * This matches jng.utils.applyPresets()
      *
      * @param scope
      * @param defaults
-     * @param options
+     * @param presets
      */
-    function setOptions(scope, defaults, options) {
-        if (!scope || !scope.optgrp || !options) { return; }
+    function applyPresets(scope, defaults, presets) {
+        if (!scope || !presets) { return; }
 
-        var opts = options[scope.optgrp] || options[scope.type + '.' + scope.optgrp];
+        // presets come from either scope (i.e. passed in directly) or get from the ui part presets
+        var opts = scope.presets || presets[scope.preset] ||
+            (scope.preset && presets[scope.type + '.' + scope.preset]) || presets[scope.type];
         if (!opts) { return; }
 
         for (var name in opts) {
             if (opts.hasOwnProperty(name)) {
                 if (!defaults || defaults[name] === undefined) {
-                    throw new Error('No defaults value for ' + name + ' but in options.' + scope.optgrp);
+                    throw new Error('No defaults value for ' + name + ' but in options.' + scope.preset);
                 }
                 else {
                     scope[name] = opts[name];
@@ -1220,7 +1225,7 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
     // expose functions
     return {
         setDefaults: setDefaults,
-        setOptions: setOptions,
+        applyPresets: applyPresets,
         generateRerender: generateRerender,
         generateRemodel: generateRemodel,
         addValidations: addValidations,
