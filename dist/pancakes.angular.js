@@ -528,7 +528,6 @@ angular.module('pancakesAngular').factory('config', function () {
  */
 (function () {
     var genericDirectives = {
-        'href':         'file',
         'src':          'file',
         'title':        'i18n',
         'placeholder':  'i18n',
@@ -610,8 +609,11 @@ angular.module('pancakesAngular').factory('config', function () {
         if (genericDirectives.hasOwnProperty(attr)) {
             attrPascal = attr.substring(0, 1).toUpperCase() + attr.substring(1);
 
-            // everyone gets a binding directive
-            addDirective('b' + attrPascal, attr, null, true, false);
+            // no b-class because just adding class one time
+            if (attr !== 'class') {
+                addDirective('b' + attrPascal, attr, null, true, false);
+            }
+
             addDirective('bo' + attrPascal, attr, null, true, true);
 
             // if file then do f- and bf- for static file
