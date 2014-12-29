@@ -1224,6 +1224,15 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
         }
     }
 
+    /**
+     * Sugar for the controller fn in a uipart. Purpose is to make it more clear what
+     * the user is trying to do (i.e. some side effects once the client loads)
+     * @param clientLoadFn
+     */
+    function onClientLoad(clientLoadFn) {
+        $injector.invoke(clientLoadFn);
+    }
+
     // expose functions
     return {
         setDefaults: setDefaults,
@@ -1242,6 +1251,7 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
         doOnEvent: doOnEvent,
         addInitModel: addInitModel,
         registerListeners: registerListeners,
-        addEventHandlers: addEventHandlers
+        addEventHandlers: addEventHandlers,
+        onClientLoad: onClientLoad
     };
 });

@@ -68,6 +68,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.useRemodelOnEvent }}tplHelper.remodelOnEvent($scope, {{=it.remodelEvents}});{{?}}
         {{? it.useRerenderOnWatch}}tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});{{?}}
         {{? it.useRerenderOnEvent}}tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});{{?}}
+        {{? it.clientLoadExists  }}tplHelper.onClientLoad({{=it.clientLoadFn}});{{?}}
 
         {{=it.body}}
     }
