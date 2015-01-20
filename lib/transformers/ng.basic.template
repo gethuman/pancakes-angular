@@ -8,3 +8,11 @@
         {{=it.body}}
     }
 ]{{? !it.raw }});{{?}}
+
+{{? it.isFromPlugin }}
+angular.module('{{=it.appName}}').{{=it.ngType}}('{{=it.pluginModuleName}}', [
+    '{{=it.moduleName}}', function ({{=it.moduleName}}) {
+        return {{=it.moduleName}};
+    }
+]);
+{{?}}
