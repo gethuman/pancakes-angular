@@ -20,14 +20,15 @@ describe('UNIT tpl.helper', function () {
         it('should set values on empty object', inject(function (tplHelper) {
             var model = {};
             var defaults = { one: 'foo', two: 'choo' };
+            var expected = { defaults: { one: 'foo', two: 'choo' }, one: 'foo', two: 'choo' };
             tplHelper.setDefaults(model, defaults);
-            model.should.deep.equal(defaults);
+            model.should.deep.equal(expected);
         }));
 
         it('should not overwrite value that already there', inject(function (tplHelper) {
             var model = { one: 'zoo' };
             var defaults = { one: 'foo', two: 'choo' };
-            var expected = { one: 'zoo', two: 'choo' };
+            var expected = { defaults: { one: 'foo', two: 'choo' }, one: 'zoo', two: 'choo' };
             tplHelper.setDefaults(model, defaults);
             model.should.deep.equal(expected);
         }));
@@ -46,11 +47,10 @@ describe('UNIT tpl.helper', function () {
         it('should add handlers to scope', inject(function (tplHelper) {
             var scope = {};
             var handlers = { one: function () {
-                return { foo: 'shoo' };
+                return function () {};
             }};
-            tplHelper.addEventHandlers(scope, handlers);
-            scope.should.have.property('one')
-                .that.deep.equal({ foo: 'shoo' });
+            tplHelper.addEventHandlers(scope, 'shmoo', handlers);
+            scope.should.have.property('one').that.is.a('Function');
         }));
     });
 });

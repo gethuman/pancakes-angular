@@ -5,33 +5,12 @@
  * Build file for Pancakes
  */
 var gulp    = require('gulp');
-var concat  = require('gulp-concat');
-var rename  = require('gulp-rename');
-var uglify  = require('gulp-uglify');
-var ngann   = require('gulp-ng-annotate');
 var taste   = require('taste');
+var batter  = require('batter');
 
-taste.init({
-    gulp:       gulp,
-    rootDir:    __dirname + '/lib',
-    loadModule: require,
-    karmaTargetCode: ['lib/pancakes.angular.app.js', 'lib/ngapp/**/*.js']
+batter.whip(gulp, taste, {
+    karmaTargetCode:    ['lib/pancakes.angular.app.js', 'lib/ngapp/**/*.js'],
+    tasksets: {
+        'default':      ['lint', 'test', 'test.karma', 'jsbuild']
+    }
 });
-
-gulp.task('build', function () {
-    return gulp.src(['lib/pancakes.angular.app.js', 'lib/ngapp/**/*.js'])
-        .pipe(concat('pancakes.angular.js'))
-        .pipe(gulp.dest('dist'));
-});
-
-gulp.task('min', function () {
-    return gulp.src(['dist/pancakes.angular.js'])
-        .pipe(ngann())
-        .pipe(uglify())
-        .pipe(rename('pancakes.angular.min.js'))
-        .pipe(gulp.dest('dist'));
-});
-
-gulp.task('default', ['jshint', 'test', 'test.karma', 'build']);
-
-
