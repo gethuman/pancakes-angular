@@ -26,6 +26,6 @@ module.exports = function (gulp, opts) {
                 .pipe(rename(buildFileName + '.min.js'))
                 .pipe(gulp.dest(buildFileDir));
         },
-        'default': ['jsbuild.concat', 'jsbuild.minify']
+        '': ['jsbuild.concat', 'jsbuild.minify']
     };
 };
