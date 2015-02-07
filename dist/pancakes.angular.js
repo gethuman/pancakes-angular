@@ -460,6 +460,48 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
 //})();
 /**
  * Author: Jeff Whelpley
+ * Date: 2/7/15
+ *
+ * Simple version of casing that can be overriden by other modules.
+ * See casing in client specific project.
+ */
+angular.module('pancakesAngular').factory('casing', function () {
+    var _ = angular;
+
+    /**
+     * Convert to camelCase
+     * @param str
+     * @param delim
+     */
+    function camelCase(str, delim) {
+        var delims = delim || ['_', '.', '-'];
+
+        if (!_.isArray(delims)) {
+            delims = [delims];
+        }
+
+        _.each(delims, function (delim) {
+            var codeParts = str.split(delim);
+            var i, codePart;
+
+            for (i = 1; i < codeParts.length; i++) {
+                codePart = codeParts[i];
+                codeParts[i] = codePart.substring(0, 1).toUpperCase() + codePart.substring(1);
+            }
+
+            str = codeParts.join('');
+        });
+
+        return str;
+    }
+
+    // expose functions
+    return {
+        camelCase: camelCase
+    };
+});
+/**
+ * Author: Jeff Whelpley
  * Date: 10/24/14
  *
  * Client side implementation of pancakes.utensils.chainPromises()
@@ -514,7 +556,9 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
  */
 angular.module('pancakesAngular').factory('config', function () {
     return {
-        staticFileRoot: '/'
+        staticFiles: {
+            assets: '/'
+        }
     };
 });
 /**
@@ -653,6 +697,60 @@ angular.module('pancakesAngular').factory('initialModel', function () {
 
 /**
  * Author: Jeff Whelpley
+ * Date: 2/7/15
+ *
+ * Client version of the pageHelper in pancakes that is used on the server side
+ */
+angular.module('pancakesAngular').factory('pageHelper', function (casing, routeHelper) {
+    var apps = {};
+    var pageHelper = {};
+
+    /**
+     * Register a page helper function
+     * @param appName
+     * @param routeName
+     * @param funcName
+     * @param func
+     */
+    pageHelper.register = function register(appName, routeName, funcName, func) {
+
+        // app and route name could be dot notation, so make them camel case
+        appName = casing.camelCase(appName, '.');
+        routeName = casing.camelCase(routeName, '.');
+
+        // make sure object is initialized
+        apps[appName] = apps[appName] || {};
+        apps[appName][routeName] = apps[appName][routeName] || {};
+
+        // we wrap the input function so we can add the routeHandler to the input options
+        function handler(opts) {
+            opts.routeHelper = routeHelper;
+            return func(opts);
+        }
+
+        // set handler in the object in case the user calls it dynamically
+        apps[appName][routeName][funcName] = handler;
+
+        // and add a convenience function name for example pageHelper.formatUrlAnswersPost(opts)
+        var name = casing.camelCase([funcName, appName, routeName].join('.'), '.');
+        this[name] = handler;
+
+        // also since many times the route name is unique, pageHelper.formatUrlPost()
+        name = casing.camelCase([funcName, routeName].join('.'), '.');
+        this[name] = handler;
+
+        // finally if just call the function name, let them pass in the appName and routeName
+        // pageHelper.formatUrl(appName, routeName, opts);
+        this[funcName] = function (appName, routeName, opts) {
+            return apps[appName][routeName][funcName](opts);
+        };
+    };
+
+    return pageHelper;
+});
+
+/**
+ * Author: Jeff Whelpley
  * Date: 4/22/14
  *
  * Change the HTML page settings
@@ -692,6 +790,15 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
 });
 
 
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/7/15
+ *
+ * This should be overriden by an implementing project
+ */
+angular.module('pancakesAngular').factory('routeHelper', function () {
+    return {};
+});
 /**
  * Author: Jeff Whelpley
  * Date: 11/7/14

@@ -20,11 +20,13 @@ module.exports = function (gulp, opts) {
                 .pipe(gulp.dest(buildFileDir));
         },
         minify: function () {
-            return gulp.src([buildFileDir + '/' + buildFileName + '.js'])
-                .pipe(ngann())
-                .pipe(uglify())
-                .pipe(rename(buildFileName + '.min.js'))
-                .pipe(gulp.dest(buildFileDir));
+            setTimeout(function () {
+                gulp.src([buildFileDir + '/' + buildFileName + '.js'])
+                    .pipe(ngann())
+                    .pipe(uglify())
+                    .pipe(rename(buildFileName + '.min.js'))
+                    .pipe(gulp.dest(buildFileDir));
+            }, 500);
         },
         '': ['jsbuild.concat', 'jsbuild.minify']
     };

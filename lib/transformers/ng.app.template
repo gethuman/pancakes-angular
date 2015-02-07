@@ -7,10 +7,18 @@ angular.module('{{=it.appName}}').factory('schemaDefinitions', function () {
 {{?}}
 
 {{? it.initLoad }}
+// note: only referencing $rootScope in params to make templating logic a little easier with the commas
 angular.module('{{=it.appName}}').run([
-    {{~it.initLoad :param:index}}'{{=param}}', {{~}}
-    function ({{~it.initLoad :param:index}}{{=param}}{{? index < (it.initLoad.length - 1) }}, {{?}}{{~}}) {
-        // do nothing here. by simply referencing load params, they will be executed
+    {{~it.initLoad :param:index}}'{{=param}}', {{~}}'$rootScope', {{?it.pageHelper}}'pageHelper',{{?}}
+    function ({{~it.initLoad :param:index}}{{=param}}, {{~}}$rootScope{{?it.pageHelper}}, pageHelper{{?}}) {
+
+        // if pageHelper exists, loop through it and register functions
+        {{? it.pageHelper }}
+        {{~it.pageHelper :item}}
+        pageHelper.register('{{=item.appName}}', '{{=item.routeName}}', '{{=item.funcName}}', {{=item.func}});
+        {{~}}
+        {{?}}
+
     }
 ]);
 {{?}}
