@@ -6,7 +6,11 @@
  */
 var _       = require('lodash');
 var karma   = require('karma').server;
-var ngCode  = ['node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js'];
+var path    = require('path');
+var ngCode  = [
+    path.normalize(__dirname + '/../node_modules/angular/angular.js'),
+    path.normalize(__dirname + '/../node_modules/angular-mocks/angular-mocks.js')
+];
 
 module.exports = function (gulp, opts) {
     var browser         = [].concat(opts.browser || 'PhantomJS');
