@@ -6,8 +6,8 @@ angular.module('{{=it.appName}}').factory('schemaDefinitions', function () {
 });
 {{?}}
 
-{{? it.initLoad }}
 // note: only referencing $rootScope in params to make templating logic a little easier with the commas
+{{? it.isCommon }}
 angular.module('{{=it.appName}}').run([
     {{~it.initLoad :param:index}}'{{=param}}', {{~}}'$rootScope', {{?it.pageHelper}}'pageHelper',{{?}}
     function ({{~it.initLoad :param:index}}{{=param}}, {{~}}$rootScope{{?it.pageHelper}}, pageHelper{{?}}) {
@@ -18,7 +18,6 @@ angular.module('{{=it.appName}}').run([
         pageHelper.register('{{=item.appName}}', '{{=item.routeName}}', '{{=item.funcName}}', {{=item.func}});
         {{~}}
         {{?}}
-
     }
 ]);
 {{?}}

@@ -130,6 +130,29 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
     };
 });
 
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Simple utility for the href directives to utilize
+ */
+angular.module('pancakesAngular').factory('bindHref', function (tapTrack, stateHelper) {
+
+    return function bind(scope, elem, attrs, value) {
+        var name = elem.length && elem[0].localName;
+
+        // if an a tag, then just set the href attribute
+        if (name === 'a') {
+            attrs.$set('href', value, scope);
+        }
+        // else we are doing a client side gh-tap
+        else {
+            tapTrack.bind(scope, elem, true, function () {
+                stateHelper.goToUrl(value);
+            });
+        }
+    };
+});
 ///**
 // * Author: Jeff Whelpley
 // * Date: 11/3/14
@@ -513,6 +536,58 @@ angular.module('pancakesAngular').factory('chainPromises', function ($q) {
     };
 });
 /**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Track stats to google analytics upon state changes
+ */
+angular.module('pancakesAngular').factory('clientAnalytics', function ($window, $location, eventBus) {
+
+    /**
+     * Sent to google using the _gaq object that should be loaded on the window
+     */
+    function captureCurrentPath() {
+        var gaq = $window._gaq || [];
+        gaq.push(['_trackPageview', $location.path()]);
+    }
+
+    // add event handler if the gaq object exists on the window
+    if ($window._gaq) {
+        eventBus.on('$stateChangeSuccess', function () {
+            captureCurrentPath();
+        });
+    }
+
+    // expose the function for testing purposes
+    return {
+        captureCurrentPath: captureCurrentPath
+    };
+});
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Initial client data thta is in the DOM
+ */
+angular.module('pancakesAngular').factory('clientData', function ($window) {
+    var clientData = $window.clientData || {};
+
+    /**
+     * Get some data from the DOM clientData object
+     * @param name
+     * @returns {*}
+     */
+    function get(name) {
+        return clientData[name];
+    }
+
+    // expose get
+    return {
+        get: get
+    };
+});
+
+/**
  * Copyright 2014 GetHuman LLC
  * Author: Jeff Whelpley
  * Date: 4/22/14
@@ -550,6 +625,41 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
 
 /**
  * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Listens for log events and sends them to the console
+ */
+angular.module('pancakesAngular').factory('clientLogReactor', function (eventBus) {
+
+    /**
+     * Send log to the console
+     * @param event
+     * @param logData
+     */
+    function logToConsole(event, logData) {
+        console.log(logData + ' || ' + JSON.stringify(logData));
+    }
+
+    /******* INIT API & EVENT HANDLERS ********/
+
+    eventBus.on('log.debug', logToConsole);              // listen for the log events
+    eventBus.on('log.info', logToConsole);
+    eventBus.on('log.error', logToConsole);
+    eventBus.on('log.critical', logToConsole);
+    eventBus.on('error.api', logToConsole);
+
+    // make sure we log any state change errors (only applies to client side)
+    eventBus.on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, err) {
+        logToConsole({}, 'State change error: ' + err.stack);
+    });
+
+    // functions to expose
+    return {
+        logToConsole: logToConsole
+    };
+});
+/**
+ * Author: Jeff Whelpley
  * Date: 10/15/14
  *
  * This module should be overridden by the app
@@ -561,6 +671,73 @@ angular.module('pancakesAngular').factory('config', function () {
         }
     };
 });
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Simple wrapper for getting external libraries outside Angular
+ * from the client
+ */
+angular.module('pancakesAngular').factory('extlibs', function ($window) {
+
+    /**
+     * Get an external client side library on the window or return empty object
+     * @param name
+     * @returns {*|{}}
+     */
+    function get(name) {
+        return $window[name] || {};
+    }
+
+    // expose get
+    return {
+        get: get
+    };
+});
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * A function that sets focus on a particular element
+ */
+angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) {
+    var jQuery = extlibs.get('jQuery');
+
+    /**
+     * Set focus on an element
+     * @param selector
+     */
+    function set(selector) {
+        $timeout(function setFocus() {
+            var el = jQuery(selector);
+            if (el && el.length) {
+                var len = el.val().length;
+                el[0].focus();
+                el[0].setSelectionRange(len, len);
+            }
+        }, 200);
+    }
+
+    /**
+     * Blur an element
+     * @param selector
+     */
+    function blur(selector) {
+        $timeout(function blurFocus() {
+            var el = jQuery(selector);
+            if (el && el.length) {
+                el[0].blur();
+            }
+        }, 100);
+    }
+
+    // expose functions
+    return {
+        set: set,
+        blur: blur
+    };
+});
+
 /**
  * Copyright 2014 GetHuman LLC
  * Author: Jeff Whelpley
@@ -792,6 +969,46 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
 
 /**
  * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * This module will get the query params and raise an event for any notifications
+ */
+angular.module('pancakesAngular').factory('queryParams', function (_, $timeout, $location, eventBus, stateHelper) {
+    var params = {};
+
+    eventBus.on('$locationChangeSuccess', function () {
+
+        var url = $location.url();
+        var idx = url.indexOf('?');
+
+        // if there is a query string
+        if (idx < 0) { return; }
+
+        // get the query string and split the keyvals
+        var query = url.substring(idx + 1);
+        var keyVals = query.split('&');
+
+        // put each key/val into the params object
+        _.each(keyVals, function (keyVal) {
+            var keyValArr = keyVal.split('=');
+            params[keyValArr[0]] = keyValArr[1];
+        });
+
+        // timeout for 500ms to allow angular to load the page as normal
+        $timeout(function modParams() {
+
+            // remove the query params
+            stateHelper.removeQueryParams();
+
+            // if there is a notify param, emit it so the notify service can display it
+            if (params.notify) { eventBus.emit('notify', params.notify); }
+        }, 500);
+    });
+
+    return params;
+});
+/**
+ * Author: Jeff Whelpley
  * Date: 2/7/15
  *
  * This should be overriden by an implementing project
@@ -799,6 +1016,25 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
 angular.module('pancakesAngular').factory('routeHelper', function () {
     return {};
 });
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Don't apply if already digest cycle in process
+ */
+angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
+    return function safeApply(fn) {
+        var phase = $rootScope.$root.$$phase;
+        if (phase === '$apply' || phase === '$digest') {
+            if (fn && (typeof(fn) === 'function')) {
+                fn();
+            }
+        } else {
+            $rootScope.$apply(fn);
+        }
+    };
+});
+
 /**
  * Author: Jeff Whelpley
  * Date: 11/7/14
@@ -877,6 +1113,109 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
 });
 
 /**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * This client side service is used to help with state changes
+ */
+angular.module('pancakesAngular').factory('stateHelper', function ($window, $timeout, $location, _, eventBus) {
+    var preventStateChange = false;
+    var preventLocationChange = false;
+
+    /**
+     * Simply go to the url and allow the state to change
+     * @param url
+     */
+    function goToUrl(url) {
+        if (!url) { return; }
+
+        if (_.isArray(url)) {
+            url = url.join('/');
+        }
+
+        var hasHttp = url.indexOf('http') === 0;
+        if (!hasHttp && url.indexOf('/') !== 0) {
+            url = '/' + url;
+        }
+
+        hasHttp ? $window.location.href = url : $location.path(url);
+    }
+
+    /**
+     * Change the URL to the slug for the given question
+     * WITHOUT firing the state changed events
+     * @param url
+     */
+    function switchUrl(url) {
+
+        // state changing off and then remove the query string
+        preventStateChange = true;
+        $location.replace().url(url);
+
+        // turn state changing back on after 200 ms
+        $timeout(function () { preventStateChange = false; }, 200);
+    }
+
+    /**
+     * Remove the query params from a page
+     */
+    function removeQueryParams() {
+        switchUrl($location.path());
+    }
+
+    /**
+     * Get the current URL using the $location service
+     * @returns {string}
+     */
+    function getCurrentUrl() {
+        var currentUrl = 'http://' + $location.host();
+        var port = $location.port();
+
+        if (port !== 80) {
+            currentUrl += ':' + port;
+        }
+
+        currentUrl += $location.url();
+        return currentUrl;
+    }
+
+    // so, this is a total hack, but basically this combination of variables and
+    // event handlers allows us to change the URL without changing the UI router state
+    eventBus.on('$stateChangeStart', function (event) {
+        if (preventStateChange) {                               // while we are switching URL, don't allow state change
+            event.preventDefault();
+        }
+    });
+
+    // whenevever state has successfully changed, make sure scroll to the top
+    eventBus.on('$stateChangeSuccess', function () {
+        $window.scrollTo(0, 0);
+    });
+
+    eventBus.on('$locationChangeStart', function (event) {
+        if (preventStateChange) {                               // while we are switcing URL
+            if (preventLocationChange) {                        // if we are suppossed to prevent a location change
+                event.preventDefault();                         // prevent the change
+                preventLocationChange = false;                  // set to false to goes back to normal now
+            }
+            else {
+                preventLocationChange = true;                   // first URL change is the one we want, after this, we prevent URL change
+            }
+        }
+        else {
+            preventLocationChange = false;
+        }
+    });
+
+    // expose function
+    return {
+        goToUrl: goToUrl,
+        switchUrl: switchUrl,
+        removeQueryParams: removeQueryParams,
+        getCurrentUrl: getCurrentUrl
+    };
+});
+/**
  * Copyright 2014 GetHuman LLC
  * Author: Jeff Whelpley
  * Date: 4/16/14
@@ -953,6 +1292,69 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
     this.$get = function () { return { getPascalCase: getPascalCase }; };
 });
 
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/16/15
+ *
+ * Tracking for taps used by the tap directive. We need this in order to maintain
+ * one source of truth across the entire web app as to the status of the tap.
+ * This allows us to create events off touch instead of the 300ms delay for click
+ * events.
+ */
+angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
+
+    // keep track of state of the tap with this boolean
+    var inProgress = false;
+
+    /**
+     * Do the actual tap
+     * @param scope
+     * @param elem
+     * @param preventDefault
+     * @param action
+     */
+    function bind(scope, elem, preventDefault, action) {
+        var tapped = false;
+
+        // Attempt to do the action as long as tap not already in progress
+        var doAction = function () {
+            if (tapped && !inProgress) {
+
+                // we are going to start the tap, don't allow another tap for 500 ms
+                inProgress = true;
+                $timeout(function () {
+                    inProgress = false;
+                }, 500);
+
+                // do the action
+                scope.$apply(action);
+            }
+            else {
+                tapped = false;
+            }
+        };
+
+        elem.bind('click', function (event) {                           // click event normal
+            tapped = true;
+            doAction();
+            if (preventDefault) { event.preventDefault(); }
+        });
+        elem.bind('touchstart', function () { tapped = true; });        // start tap
+        elem.bind('touchend', function (event) {                        // end tap and do the action
+            doAction();
+            if (preventDefault) { event.preventDefault(); }
+        });
+        elem.bind('touchmove', function (event) {                       // if move, then cancel tap
+            tapped = false;
+            return event.stopImmediatePropagation();
+        });
+    }
+
+    // expose functions
+    return {
+        bind: bind
+    };
+});
 /**
  * Author: Jeff Whelpley
  * Date: 10/16/14
