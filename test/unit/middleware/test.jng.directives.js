@@ -75,14 +75,6 @@ describe('UNIT ' + name, function () {
         });
     });
 
-    describe('getPartial()', function () {
-        it('should get a partial from the file system', function () {
-            var partial = jng.getPartial.call(context, appName, 'fakesimple.partial.js');
-            partial.should.have.property('view');
-            partial.should.have.property('subviews').that.has.property('sub1');
-        });
-    });
-
     describe('getComponentDirectives()', function () {
         it('should return some directives for foo', function () {
             var directives = jng.getComponentDirectives.call(context, 'foo', 'pan');
