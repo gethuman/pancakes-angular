@@ -1,6 +1,6 @@
 {
   "name": "pancakes-angular",
-  "version": "0.1.55",
+  "version": "0.1.56",
   "description": "Pancakes plugin for Angular",
   "main": "lib/pancakes.angular.plugin.js",
   "repository": {
@@ -42,7 +42,7 @@
     "dot": "^1.0.3",
     "gulp": "^3.8.11",
     "jshint": "^2.6.0",
-    "pancakes": "^0.1.47",
+    "pancakes": "^0.1.48",
     "prettyjson": "^1.1.0",
     "taste": "^0.1.49"
   }
