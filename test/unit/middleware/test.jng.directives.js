@@ -14,7 +14,6 @@ var pancakes    = require('pancakes');
 var _           = require('lodash');
 
 describe('UNIT ' + name, function () {
-    var appName = 'foo';
     var context = {
         pancakes: pancakes
     };
