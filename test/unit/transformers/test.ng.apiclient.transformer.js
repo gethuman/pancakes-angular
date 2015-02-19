@@ -26,7 +26,7 @@ describe('UNIT ' + name, function () {
         //it('should return a model from a given resource', function () {
         //    var resource = {
         //        name: 'post',
-        //        adapters: { browser: 'restapi' },
+        //        adapters: { browser: 'apiclient' },
         //        api: {
         //            GET: {
         //                '/posts':       'find',
