@@ -9,14 +9,29 @@ angular.module('{{=it.appName}}').factory('schemaDefinitions', function () {
 // note: only referencing $rootScope in params to make templating logic a little easier with the commas
 {{? it.isCommon }}
 angular.module('{{=it.appName}}').run([
-    {{~it.initLoad :param:index}}'{{=param}}', {{~}}'$rootScope', {{?it.pageHelper}}'pageHelper',{{?}}
-    function ({{~it.initLoad :param:index}}{{=param}}, {{~}}$rootScope{{?it.pageHelper}}, pageHelper{{?}}) {
+    {{~it.initLoad :param:index}}'{{=param}}', {{~}}{{? it.isMobile }}'$ionicPlatform', {{?}}'$rootScope', {{?it.pageHelper}}'pageHelper',{{?}}
+    function ({{~it.initLoad :param:index}}{{=param}}, {{~}}{{? it.isMobile }}$ionicPlatform, {{?}}$rootScope{{?it.pageHelper}}, pageHelper{{?}}) {
 
         // if pageHelper exists, loop through it and register functions
         {{? it.pageHelper }}
         {{~it.pageHelper :item}}
         pageHelper.register('{{=item.appName}}', '{{=item.routeName}}', '{{=item.funcName}}', {{=item.func}});
         {{~}}
+        {{?}}
+
+        {{? it.isMobile }}
+        $ionicPlatform.ready(function () {
+
+            // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+            // for form inputs)
+            if(window.cordova && window.cordova.plugins.Keyboard) {
+                cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+            }
+
+            if(window.StatusBar) {
+                StatusBar.styleDefault();
+            }
+        });
         {{?}}
     }
 ]);
