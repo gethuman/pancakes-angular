@@ -17,9 +17,10 @@ module.exports = function (gulp, opts) {
     var reporter        = [].concat(opts.reporter || 'progress');
     var useTestCoverage = opts.cov;
     var useWatch        = opts.watch;
+    var jsLibs          = opts.jsLibs || [];
     var karmaTargetCode = [].concat(opts.karmaTargetCode || []);
     var karmaTestCode   = opts.karmaTestCode || 'test/karma/**/*.js';
-    var karmaCode       = [].concat(ngCode, karmaTargetCode, karmaTestCode);
+    var karmaCode       = [].concat(ngCode, jsLibs, karmaTargetCode, karmaTestCode);
 
     if (!karmaTargetCode.length) {
         throw new Error('Karma tests require karmaTargetCode param in batter.whip()');

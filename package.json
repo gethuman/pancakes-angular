@@ -38,12 +38,14 @@
     "q": "^1.2.0"
   },
   "devDependencies": {
+    "angular-cookies": "^1.3.14",
     "batter": "0.0.20",
     "dot": "^1.0.3",
     "gulp": "^3.8.11",
-    "jshint": "^2.6.0",
-    "pancakes": "^0.1.50",
+    "jshint": "^2.6.1",
+    "pancakes": "^0.1.51",
     "prettyjson": "^1.1.0",
+    "streamqueue": "^0.1.3",
     "taste": "^0.1.51"
   }
 }

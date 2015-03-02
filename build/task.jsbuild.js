@@ -4,10 +4,12 @@
  *
  * Build the javascript in this library
  */
-var concat  = require('gulp-concat');
-var rename  = require('gulp-rename');
-var uglify  = require('gulp-uglify');
-var ngann   = require('gulp-ng-annotate');
+var concat      = require('gulp-concat');
+var rename      = require('gulp-rename');
+var uglify      = require('gulp-uglify');
+var ngann       = require('gulp-ng-annotate');
+var streamqueue = require('streamqueue');
+var objMode     = { objectMode: true };
 
 module.exports = function (gulp, opts) {
     var buildFileName = opts.buildFileName || 'pancakes.angular';
@@ -15,7 +17,10 @@ module.exports = function (gulp, opts) {
 
     return {
         concat: function () {
-            return gulp.src(opts.karmaTargetCode)
+            return streamqueue(objMode,
+                //gulp.src(opts.jsLibs),
+                gulp.src(opts.karmaTargetCode)
+            )
                 .pipe(concat(buildFileName + '.js'))
                 .pipe(gulp.dest(buildFileDir));
         },

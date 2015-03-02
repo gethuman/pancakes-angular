@@ -4,7 +4,7 @@
  *
  * The app definition for pancakes.angular
  */
-angular.module('pancakesAngular', []);
+angular.module('pancakesAngular', ['ngCookies']);
 
 /* jshint undef: false */
 
@@ -32,7 +32,7 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  *
  * For angular clients to make ajax calls to server
  */
-angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus, config) {
+angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus, config, storage) {
 
     /**
      * Send call to the server and get a response
@@ -87,11 +87,15 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
 
         // set up the api options
         var apiOpts = {
-            method: method,
-            url: url,
-            withCredentials: true,
-            cache: false
+            method:     method,
+            url:        url
         };
+
+        // if the jwt exists, add it to the request
+        var jwt = storage.get('jwt');
+        if (jwt) {
+            apiOpts.headers = { 'Authorization': 'Bearer ' + jwt };
+        }
 
         // add data to api options if available
         if (data) {
@@ -1138,7 +1142,9 @@ angular.module('pancakesAngular').factory('stateHelper', function ($window, $tim
             url = '/' + url;
         }
 
-        hasHttp ? $window.location.href = url : $location.path(url);
+        //TODO: fix bug here with $location.path() that does some wonky stuff as of angular 1.3.14
+        $window.location.href = url;
+        //hasHttp ? $window.location.href = url : $location.path(url);
     }
 
     /**
@@ -1290,6 +1296,50 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
      * @returns {{}}
      */
     this.$get = function () { return { getPascalCase: getPascalCase }; };
+});
+
+/**
+ * Author: Jeff Whelpley
+ * Date: 2/27/15
+ *
+ * This is used to store stuff in localStorage and cookies at same time
+ */
+angular.module('pancakesAngular').factory('storage', function (extlibs, $cookies, $document) {
+    var localStorage = extlibs.get('localStorage');
+
+    /**
+     * Set a value in both localStorage and cookies
+     * @param name
+     * @param value
+     */
+    function set(name, value) {
+        localStorage.setItem(name, value);
+        $cookies[name] = value;
+    }
+
+    /**
+     * Get a value. This will first check localStorage. If doesn't
+     * exist there, then will check cookies
+     * @param name
+     */
+    function get(name) {
+        return localStorage.getItem(name) || $cookies[name];
+    }
+
+    /**
+     * Remove a value from localStorage and cookies
+     * @param name
+     */
+    function remove(name) {
+        localStorage.removeItem(name);
+        window.document.cookie = name + '=; path=/; domain=.gethuman.com; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+    }
+
+    return {
+        set: set,
+        get: get,
+        remove: remove
+    };
 });
 
 /**
