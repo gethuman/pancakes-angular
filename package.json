@@ -1,6 +1,6 @@
 {
   "name": "pancakes-angular",
-  "version": "0.1.63",
+  "version": "0.1.64",
   "description": "Pancakes plugin for Angular",
   "main": "lib/pancakes.angular.plugin.js",
   "repository": {
@@ -35,7 +35,8 @@
     "lodash": "~3.3.1",
     "lru-cache": "^2.5.0",
     "mocha": "^2.1.0",
-    "q": "^1.2.0"
+    "q": "^1.2.0",
+    "streamqueue": "^0.1.3"
   },
   "devDependencies": {
     "angular-cookies": "^1.3.14",
