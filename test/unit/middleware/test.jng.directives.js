@@ -114,7 +114,7 @@ describe('UNIT ' + name, function () {
         jng.initDirectives.call(context, { componentPrefix: 'pan' });
         var template = obj.div({ 'pan-fakesimple': null });
         var expected = '<div pan-fakesimple><span>hello, world</span></div>';
-        var actual = jangular.render(template);
+        var actual =    jangular.render(template);
         actual.should.equal(expected);
     });
 });
