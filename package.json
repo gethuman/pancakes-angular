@@ -20,12 +20,12 @@
   },
   "homepage": "https://github.com/gethuman/pancakes-angular",
   "dependencies": {
-    "angular": "^1.3.14",
+    "angular": "^1.3.15",
     "gulp-concat": "^2.5.2",
     "gulp-ng-annotate": "^0.5.2",
     "gulp-rename": "^1.2.0",
     "gulp-uglify": "^1.1.0",
-    "jangular": "^0.1.58",
+    "jangular": "^0.1.59",
     "karma": "^0.12.31",
     "karma-coverage": "^0.2.7",
     "karma-jquery": "^0.1.0",
@@ -39,13 +39,13 @@
     "streamqueue": "^0.1.3"
   },
   "devDependencies": {
-    "angular-cookies": "^1.3.14",
-    "batter": "0.0.23",
+    "angular-cookies": "^1.3.15",
+    "batter": "0.0.24",
     "dot": "^1.0.3",
     "gulp": "^3.8.11",
     "jshint": "^2.6.3",
-    "pancakes": "^0.1.54",
+    "pancakes": "^0.1.55",
     "prettyjson": "^1.1.0",
-    "taste": "^0.1.54"
+    "taste": "^0.1.55"
   }
 }
