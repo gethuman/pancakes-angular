@@ -749,7 +749,7 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
  *
  * Utilities for generating directives or helping generate them. This functionality
  * should somewhat line up with the server side implementation that is in
- * pancakes.angular.middleware.js addGenericDirectives()
+ * pancakes.angular jng.directives.js addGenericDirectives()
  */
 (function () {
     var genericDirectives = {
@@ -771,6 +771,19 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
     // function used for each of the generic directives
     function addDirective(directiveName, attrName, filterType, isBind, isBindOnce) {
         app.directive(directiveName, ['i18n', 'config', function (i18n, config) {
+
+            function setValue(scope, element, attrs, value) {
+                value = filterType === 'file' ?
+                    (config.staticFileRoot + value) :
+                    i18n.translate(value, scope);
+
+                attrName === 'text' ?
+                    element.text(value) :
+                    attrName === 'class' ?
+                        attrs.$addClass(value) :
+                        attrs.$set(attrName, value, scope);
+            }
+
             return {
                 priority: 101,
                 link: function linkFn(scope, element, attrs) {
@@ -780,15 +793,7 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
                     if (isBind) {
                         var unwatch = scope.$watch(originalValue, function (value) {
                             if (value !== undefined && value !== null) {
-                                value = filterType === 'file' ?
-                                config.staticFileRoot + value :
-                                    i18n.translate(value);
-
-                                attrName === 'text' ?
-                                    element.text(value) :
-                                    attrName === 'class' ?
-                                        attrs.$addClass(value) :
-                                        attrs.$set(attrName, value, scope);
+                                setValue(scope, element, attrs, value);
 
                                 // if bind once, we are unwatch after the first time
                                 if (isBindOnce && unwatch) { unwatch(); }
@@ -802,26 +807,13 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
                         // if the value contains {{ it means there is interpolation
                         if (originalValue.indexOf('{{') >= 0) {
                             var unobserve = attrs.$observe(directiveName, function (value) {
-                                value = filterType === 'file' ?
-                                config.staticFileRoot + value :
-                                    i18n.translate(value, scope);
-
-                                attrName === 'text' ?
-                                    element.text(value) :
-                                    attrs.$set(attrName, value, scope);
-
+                                setValue(scope, element, attrs, value);
                                 if (isBindOnce && unobserve) { unobserve(); }
                             });
                         }
                         // else we are very simply setting the value
                         else {
-                            var targetValue = filterType === 'file' ?
-                            config.staticFileRoot + originalValue :
-                                i18n.translate(originalValue);
-
-                            attrName === 'text' ?
-                                element.text(targetValue) :
-                                attrs.$set(attrName, targetValue, scope);
+                            setValue(scope, element, attrs, originalValue);
                         }
                     }
                 }
