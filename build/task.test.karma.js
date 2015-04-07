@@ -34,6 +34,7 @@ module.exports = function (gulp, opts) {
         colors:             true,
         browsers:           browser,
         reporters:          reporter,
+        plugins:            ['karma-jquery', 'karma-mocha', 'karma-sinon-chai', 'karma-phantomjs-launcher'],
         frameworks:         ['jquery-2.1.0', 'mocha', 'sinon-chai'],
         preprocessors:      {},
         coverageReporter:   { type: 'text-summary', dir: 'test/coverage/' },
