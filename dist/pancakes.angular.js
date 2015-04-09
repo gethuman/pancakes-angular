@@ -1135,8 +1135,8 @@ angular.module('pancakesAngular').factory('stateHelper', function ($window, $tim
         }
 
         //TODO: fix bug here with $location.path() that does some wonky stuff as of angular 1.3.14
-        $window.location.href = url;
-        //hasHttp ? $window.location.href = url : $location.path(url);
+        //$window.location.href = url;
+        hasHttp ? $window.location.href = url : $location.path(url);
     }
 
     /**
