@@ -915,7 +915,7 @@ angular.module('pancakesAngular').factory('pageHelper', function (casing, routeH
         // finally if just call the function name, let them pass in the appName and routeName
         // pageHelper.formatUrl(appName, routeName, opts);
         this[funcName] = function (appName, routeName, opts) {
-            return apps[appName][routeName][funcName](opts);
+            return handler(opts);
         };
     };
 
@@ -1506,7 +1506,7 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
         if (!scope || !presets) { return; }
 
         // presets come from either scope (i.e. passed in directly) or get from the ui part presets
-        var opts = scope.presets || presets[scope.preset] ||
+        var opts = scope.presets || (scope.item && scope.item.type && presets[scope.item.type]) || presets[scope.preset] ||
             (scope.preset && presets[scope.type + '.' + scope.preset]) || presets[scope.type];
         if (!opts) { return; }
 
