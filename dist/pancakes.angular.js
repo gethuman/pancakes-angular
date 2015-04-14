@@ -81,6 +81,14 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
                 paramArray.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
             }
         }
+
+        // add visitorId to params
+        var visitorId = storage.get('visitorId');
+        if (visitorId) {
+            paramArray.push('onBehalfOfVisitorId' + '=' + visitorId);
+        }
+
+        // add params to URL
         if (paramArray.length) {
             url += '?' + paramArray.join('&');
         }
@@ -94,7 +102,9 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
         // if the jwt exists, add it to the request
         var jwt = storage.get('jwt');
         if (jwt) {
-            apiOpts.headers = { 'Authorization': 'Bearer ' + jwt };
+            apiOpts.headers = {
+                Authorization: 'Bearer ' + jwt
+            };
         }
 
         // add data to api options if available
