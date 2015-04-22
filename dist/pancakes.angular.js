@@ -951,9 +951,18 @@ angular.module('pancakesAngular').factory('pageHelper', function (casing, routeH
 
         // finally if just call the function name, let them pass in the appName and routeName
         // pageHelper.formatUrl(appName, routeName, opts);
+        /*
         this[funcName] = function (appName, routeName, opts) {
             return handler(opts);
         };
+        */
+
+        if ( !this[funcName] ) {
+            this[funcName] = function (appName, routeName, opts) {
+                return apps[appName][routeName][funcName](opts);
+            };
+        }
+
     };
 
     return pageHelper;
