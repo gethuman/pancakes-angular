@@ -1342,7 +1342,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  */
 angular.module('pancakesAngular').factory('storage', function (extlibs, config) {
     var localStorage = extlibs.get('localStorage');
-    var cookieDomain = config.cookieDomain;
+    var cookieDomain = config.security && config.security.cookie && config.security.cookie.domain;
     var document = window.document;
 
     /**
