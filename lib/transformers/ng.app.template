@@ -9,15 +9,8 @@ angular.module('{{=it.appName}}').factory('schemaDefinitions', function () {
 // note: only referencing $rootScope in params to make templating logic a little easier with the commas
 {{? it.isCommon }}
 angular.module('{{=it.appName}}').run([
-    {{~it.initLoad :param:index}}'{{=param}}', {{~}}{{? it.isMobile }}'$ionicPlatform', {{?}}'$rootScope', {{?it.pageHelper}}'pageHelper',{{?}}
-    function ({{~it.initLoad :param:index}}{{=param}}, {{~}}{{? it.isMobile }}$ionicPlatform, auth, {{?}}$rootScope{{?it.pageHelper}}, pageHelper{{?}}) {
-
-        // if pageHelper exists, loop through it and register functions
-        {{? it.pageHelper }}
-        {{~it.pageHelper :item}}
-        pageHelper.register('{{=item.appName}}', '{{=item.routeName}}', '{{=item.funcName}}', {{=item.func}});
-        {{~}}
-        {{?}}
+    {{~it.initLoad :param:index}}'{{=param}}', {{~}}{{? it.isMobile }}'$ionicPlatform', {{?}}'$rootScope',
+    function ({{~it.initLoad :param:index}}{{=param}}, {{~}}{{? it.isMobile }}$ionicPlatform, auth, {{?}}$rootScope) {
 
         {{? it.isMobile }}
         $ionicPlatform.ready(function () {
