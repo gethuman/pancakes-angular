@@ -34,8 +34,8 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon-chai": "^0.3.0",
     "lodash": "~3.8.0",
-    "lru-cache": "^2.6.2",
-    "mocha": "^2.2.4",
+    "lru-cache": "^2.6.3",
+    "mocha": "^2.2.5",
     "q": "^1.4.0",
     "streamqueue": "^0.1.3"
   },
@@ -45,7 +45,7 @@
     "dot": "^1.0.3",
     "gulp": "^3.8.11",
     "jshint": "^2.7.0",
-    "pancakes": "^0.1.68",
+    "pancakes": "^0.1.70",
     "prettyjson": "^1.1.1",
     "taste": "^0.1.62"
   }
