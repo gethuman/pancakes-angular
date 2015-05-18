@@ -51,6 +51,6 @@ describe('UNIT ' + name, function () {
         var model = { foo2: false };
         var expected = '<div><div>sub1</div></div>';
         var actual = jng.renderPage.call(context, routeInfo, page, model);
-        actual.should.equal(expected);
+        actual.should.eventually.equal(expected);
     });
 });
