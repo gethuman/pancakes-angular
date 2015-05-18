@@ -26,7 +26,7 @@
     "gulp-ng-annotate": "^0.5.3",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.2.0",
-    "jangular": "^0.2.11",
+    "jangular": "^0.2.12",
     "karma": "^0.12.31",
     "karma-coverage": "^0.3.1",
     "karma-jquery": "^0.1.0",
@@ -36,17 +36,17 @@
     "lodash": "~3.8.0",
     "lru-cache": "^2.6.3",
     "mocha": "^2.2.5",
-    "q": "^1.4.0",
+    "q": "^1.4.1",
     "streamqueue": "^0.1.3"
   },
   "devDependencies": {
     "angular-cookies": "^1.3.15",
-    "batter": "0.0.36",
+    "batter": "0.0.37",
     "dot": "^1.0.3",
     "gulp": "^3.8.11",
     "jshint": "^2.7.0",
-    "pancakes": "^0.1.70",
+    "pancakes": "^0.1.71",
     "prettyjson": "^1.1.1",
-    "taste": "^0.1.62"
+    "taste": "^0.1.63"
   }
 }
