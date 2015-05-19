@@ -1223,6 +1223,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
         var stateNames = {};
         angular.forEach(routes, function (route) {
             angular.forEach(route.urls, function (url, idx) {
+                var sideview = route.sideview || 'default';
                 var initialModel = resolves[route.name] || function () { return {}; };
                 var stateName = (route.name + (idx === 0 ? '' : '--' + idx)).replace(/\./g, '-');
                 var stateConfig = {
@@ -1243,8 +1244,8 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                             templateUrl:    'templates/' + route.name
                         },
                         'sideview': {
-                            controller:     getPascalCase(appName + 'SideviewCtrl'),
-                            templateUrl:    'templates/' + appName + '.sideview'
+                            controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
+                            templateUrl:    'templates/' + appName + '.sideview.' + sideview
                         }
                     }
                 };
