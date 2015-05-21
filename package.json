@@ -1,6 +1,6 @@
 {
   "name": "pancakes-angular",
-  "version": "0.1.92",
+  "version": "0.1.93",
   "description": "Pancakes plugin for Angular",
   "main": "lib/pancakes.angular.plugin.js",
   "repository": {
