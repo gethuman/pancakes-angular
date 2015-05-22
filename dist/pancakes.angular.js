@@ -806,13 +806,14 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
     var attrPascal, type;
 
     // function used for each of the generic directives
-    function addDirective(directiveName, attrName, filterType, isBind, isBindOnce) {
+    function addDirective(directiveName, attrName, filterType, isBind, isBindOnce, isFilter) {
         app.directive(directiveName, ['i18n', 'config', function (i18n, config) {
 
             function setValue(scope, element, attrs, value) {
-                value = filterType === 'file' ?
-                    (config.staticFileRoot + value) :
-                    i18n.translate(value, scope);
+                value = !isFilter ? value :
+                    filterType === 'file' ?
+                        (config.staticFileRoot + value) :
+                        i18n.translate(value, scope);
 
                 attrName === 'text' ?
                     element.text(value) :
@@ -831,15 +832,13 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
                         var unwatch = scope.$watch(originalValue, function (value) {
                             if (value !== undefined && value !== null) {
                                 setValue(scope, element, attrs, value);
-
-                                // if bind once, we are unwatch after the first time
                                 if (isBindOnce && unwatch) { unwatch(); }
                             }
                         });
                     }
 
                     // else we are not binding, but we want to do some filtering
-                    else if (!isBind && filterType !== null) {
+                    else if (!isBind && isFilter && filterType !== null) {
 
                         // if the value contains {{ it means there is interpolation
                         if (originalValue.indexOf('{{') >= 0) {
@@ -853,6 +852,9 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
                             setValue(scope, element, attrs, originalValue);
                         }
                     }
+                    else {
+                        throw new Error('Not bind nor filter in generic addDirective for ' + originalValue);
+                    }
                 }
             };
         }]);
@@ -865,18 +867,18 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
 
             // no b-class because just adding class one time
             if (attr !== 'class') {
-                addDirective('b' + attrPascal, attr, null, true, false);
+                addDirective('b' + attrPascal, attr, null, true, false, false);
             }
 
-            addDirective('bo' + attrPascal, attr, null, true, true);
+            addDirective('bo' + attrPascal, attr, null, true, true, false);
 
             // if file then do f- and bf- for static file
             type = genericDirectives[attr];
             if (type) {
-                addDirective('f' + attrPascal, attr, type, false, false);
-                addDirective('fo' + attrPascal, attr, type, false, true);
-                addDirective('bf' + attrPascal, attr, type, true, false);
-                addDirective('bfo' + attrPascal, attr, type, true, true);
+                addDirective('f' + attrPascal, attr, type, false, false, true);
+                addDirective('fo' + attrPascal, attr, type, false, true, true);
+                addDirective('bf' + attrPascal, attr, type, true, false, true);
+                addDirective('bfo' + attrPascal, attr, type, true, true, true);
             }
         }
     }
@@ -890,7 +892,9 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
  */
 angular.module('pancakesAngular').factory('i18n', function () {
     return {
-        translate: function (val) { return val; }
+        translate: function (val) {
+            return val;
+        }
     };
 });
 /**
