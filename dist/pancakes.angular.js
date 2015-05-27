@@ -32,7 +32,7 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  *
  * For angular clients to make ajax calls to server
  */
-angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus, config, storage) {
+angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "config", "storage", function ($q, $http, eventBus, config, storage) {
 
     /**
      * Send call to the server and get a response
@@ -142,7 +142,7 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
     return {
         send: send
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -150,7 +150,7 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
  *
  * Simple utility for the href directives to utilize
  */
-angular.module('pancakesAngular').factory('bindHref', function (tapTrack, stateHelper) {
+angular.module('pancakesAngular').factory('bindHref', ["tapTrack", "stateHelper", function (tapTrack, stateHelper) {
 
     return function bind(scope, elem, attrs, value) {
         var name = elem.length && elem[0].localName;
@@ -166,7 +166,7 @@ angular.module('pancakesAngular').factory('bindHref', function (tapTrack, stateH
             });
         }
     };
-});
+}]);
 ///**
 // * Author: Jeff Whelpley
 // * Date: 11/3/14
@@ -543,19 +543,19 @@ angular.module('pancakesAngular').factory('casing', function () {
  *
  * Client side implementation of pancakes.utensils.chainPromises()
  */
-angular.module('pancakesAngular').factory('chainPromises', function ($q) {
+angular.module('pancakesAngular').factory('chainPromises', ["$q", function ($q) {
     return function chainPromises(calls, val) {
         if (!calls || !calls.length) { return $q.when(val); }
         return calls.reduce($q.when, $q.when(val));
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * Track stats to google analytics upon state changes
  */
-angular.module('pancakesAngular').factory('clientAnalytics', function ($window, $location, eventBus) {
+angular.module('pancakesAngular').factory('clientAnalytics', ["$window", "$location", "eventBus", function ($window, $location, eventBus) {
 
     /**
      * Sent to google using the _gaq object that should be loaded on the window
@@ -576,14 +576,14 @@ angular.module('pancakesAngular').factory('clientAnalytics', function ($window, 
     return {
         captureCurrentPath: captureCurrentPath
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * Initial client data thta is in the DOM
  */
-angular.module('pancakesAngular').factory('clientData', function ($window) {
+angular.module('pancakesAngular').factory('clientData', ["$window", function ($window) {
     var clientData = $window.clientData || {};
 
     /**
@@ -599,7 +599,7 @@ angular.module('pancakesAngular').factory('clientData', function ($window) {
     return {
         get: get
     };
-});
+}]);
 
 /**
  * Copyright 2014 GetHuman LLC
@@ -609,7 +609,7 @@ angular.module('pancakesAngular').factory('clientData', function ($window) {
  * Client side event bus is essentially an isolated scope that
  * has been enhanced with a couple convenience functions
  */
-angular.module('pancakesAngular').factory('eventBus', function ($document, $rootScope) {
+angular.module('pancakesAngular').factory('eventBus', ["$document", "$rootScope", function ($document, $rootScope) {
 
     // the event bus is a new isolated scope
     var eventBus = $rootScope.$new(true);
@@ -635,7 +635,7 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
     };
 
     return eventBus;
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -643,7 +643,7 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
  *
  * Listens for log events and sends them to the console
  */
-angular.module('pancakesAngular').factory('clientLogReactor', function (extlibs, eventBus, config) {
+angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "eventBus", "config", function (extlibs, eventBus, config) {
     config = config || {};
 
     var raven = extlibs.get('Raven');
@@ -698,7 +698,7 @@ angular.module('pancakesAngular').factory('clientLogReactor', function (extlibs,
     return {
         log: log
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 10/15/14
@@ -719,7 +719,7 @@ angular.module('pancakesAngular').factory('config', function () {
  * Simple wrapper for getting external libraries outside Angular
  * from the client
  */
-angular.module('pancakesAngular').factory('extlibs', function ($window) {
+angular.module('pancakesAngular').factory('extlibs', ["$window", function ($window) {
 
     /**
      * Get an external client side library on the window or return empty object
@@ -734,14 +734,14 @@ angular.module('pancakesAngular').factory('extlibs', function ($window) {
     return {
         get: get
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * A function that sets focus on a particular element
  */
-angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) {
+angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", function ($timeout, extlibs) {
     var jQuery = extlibs.get('jQuery');
 
     /**
@@ -777,7 +777,7 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
         set: set,
         blur: blur
     };
-});
+}]);
 
 /**
  * Copyright 2014 GetHuman LLC
@@ -915,7 +915,7 @@ angular.module('pancakesAngular').factory('initialModel', function () {
  *
  * Change the HTML page settings
  */
-angular.module('pancakesAngular').factory('pageSettings', function ($window, $rootElement) {
+angular.module('pancakesAngular').factory('pageSettings', ["$window", "$rootElement", function ($window, $rootElement) {
 
     /**
      * Set the page title and description
@@ -947,7 +947,7 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
         updateHead: updateHead,
         updatePageStyle: updatePageStyle
     };
-});
+}]);
 
 
 /**
@@ -956,7 +956,7 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
  *
  * This module will get the query params and raise an event for any notifications
  */
-angular.module('pancakesAngular').factory('queryParams', function (_, $timeout, $location, eventBus, stateHelper) {
+angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$location", "eventBus", "stateHelper", function (_, $timeout, $location, eventBus, stateHelper) {
     var params = {};
 
     eventBus.on('$locationChangeSuccess', function () {
@@ -989,14 +989,14 @@ angular.module('pancakesAngular').factory('queryParams', function (_, $timeout, 
     });
 
     return params;
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * Don't apply if already digest cycle in process
  */
-angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
+angular.module('pancakesAngular').factory('safeApply', ["$rootScope", function ($rootScope) {
     return function safeApply(fn) {
         var phase = $rootScope.$root.$$phase;
         if (phase === '$apply' || phase === '$digest') {
@@ -1007,7 +1007,7 @@ angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
             $rootScope.$apply(fn);
         }
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -1015,7 +1015,7 @@ angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
  *
  *
  */
-angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
+angular.module('pancakesAngular').factory('serviceHelper', ["ajax", function (ajax) {
 
     /**
      * Generate a service method
@@ -1084,7 +1084,7 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
         genService: genService,
         genModel: genModel
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -1092,7 +1092,7 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
  *
  * This client side service is used to help with state changes
  */
-angular.module('pancakesAngular').factory('stateHelper', function ($window, $timeout, $location, _, eventBus) {
+angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout", "$location", "_", "eventBus", function ($window, $timeout, $location, _, eventBus) {
     var preventStateChange = false;
     var preventLocationChange = false;
 
@@ -1188,7 +1188,7 @@ angular.module('pancakesAngular').factory('stateHelper', function ($window, $tim
         removeQueryParams: removeQueryParams,
         getCurrentUrl: getCurrentUrl
     };
-});
+}]);
 /**
  * Copyright 2014 GetHuman LLC
  * Author: Jeff Whelpley
@@ -1278,7 +1278,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  *
  * This is used to store stuff in localStorage and cookies at same time
  */
-angular.module('pancakesAngular').factory('storage', function (extlibs, config) {
+angular.module('pancakesAngular').factory('storage', ["extlibs", "config", function (extlibs, config) {
     var localStorage = extlibs.get('localStorage');
     var cookieDomain = config.security && config.security.cookie && config.security.cookie.domain;
     var document = window.document;
@@ -1383,7 +1383,7 @@ angular.module('pancakesAngular').factory('storage', function (extlibs, config) 
         removeCookie: removeCookie,
         remove: remove
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -1394,7 +1394,7 @@ angular.module('pancakesAngular').factory('storage', function (extlibs, config) 
  * This allows us to create events off touch instead of the 300ms delay for click
  * events.
  */
-angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
+angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($timeout) {
 
     // keep track of state of the tap with this boolean
     var inProgress = false;
@@ -1447,7 +1447,7 @@ angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
     return {
         bind: bind
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 10/16/14
@@ -1455,7 +1455,7 @@ angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
  * This has utilities that are used to help work with generated
  * template code
  */
-angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, config, pageSettings, eventBus) {
+angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "config", "pageSettings", "eventBus", function ($q, $injector, config, pageSettings, eventBus) {
 
     /**
      * Given a set of default values, add them to the scope if
@@ -1856,4 +1856,4 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
         addEventHandlers: addEventHandlers,
         onClientLoad: onClientLoad
     };
-});
+}]);

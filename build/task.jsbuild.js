@@ -21,13 +21,13 @@ module.exports = function (gulp, opts) {
                 //gulp.src(opts.jsLibs),
                 gulp.src(opts.karmaTargetCode)
             )
+                .pipe(ngann())
                 .pipe(concat(buildFileName + '.js'))
                 .pipe(gulp.dest(buildFileDir));
         },
         minify: function () {
             setTimeout(function () {
                 gulp.src([buildFileDir + '/' + buildFileName + '.js'])
-                    .pipe(ngann())
                     .pipe(uglify())
                     .pipe(rename(buildFileName + '.min.js'))
                     .pipe(gulp.dest(buildFileDir));
