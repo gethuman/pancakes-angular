@@ -1222,8 +1222,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
      * @param appName
      * @param routes
      * @param resolves
+     * @param isMobile
      */
-    this.loadStates = function loadStates($stateProvider, appName, routes, resolves) {
+    this.loadStates = function loadStates($stateProvider, appName, routes, resolves, isMobile) {
         var stateNames = {};
         angular.forEach(routes, function (route) {
             angular.forEach(route.urls, function (url, idx) {
@@ -1246,13 +1247,16 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         '': {
                             controller:     getPascalCase(route.name + 'Ctrl'),
                             templateUrl:    'templates/' + route.name
-                        },
-                        'sideview': {
-                            controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
-                            templateUrl:    'templates/' + appName + '.sideview.' + sideview
                         }
                     }
                 };
+
+                if (!isMobile) {
+                    stateConfig.views.sideview = {
+                        controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
+                        templateUrl:    'templates/' + appName + '.sideview.' + sideview
+                    };
+                }
 
                 // need to make sure state names are unique so just add a timestamp if nothing else
                 if (stateNames[stateName]) { stateName += (new Date()).getTime(); }
