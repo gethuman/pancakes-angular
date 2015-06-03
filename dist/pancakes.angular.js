@@ -4,7 +4,7 @@
  *
  * The app definition for pancakes.angular
  */
-angular.module('pancakesAngular', []);
+angular.module('pancakesAngular', ['ngCookies']);
 
 /* jshint undef: false */
 
@@ -103,7 +103,7 @@ angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "c
         var jwt = storage.get('jwt');
         if (jwt) {
             apiOpts.headers = {
-                Authorization: 'Bearer ' + jwt
+                Authorization: jwt
             };
         }
 
@@ -1282,32 +1282,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  *
  * This is used to store stuff in localStorage and cookies at same time
  */
-angular.module('pancakesAngular').factory('storage', ["extlibs", "config", function (extlibs, config) {
+angular.module('pancakesAngular').factory('storage', ["extlibs", "config", "$cookies", function (extlibs, config, $cookies) {
     var localStorage = extlibs.get('localStorage');
     var cookieDomain = config.security && config.security.cookie && config.security.cookie.domain;
-    var document = window.document;
-
-    /**
-     * Set a cookie value
-     * @param name
-     * @param value
-     * @param domain
-     * @returns {boolean}
-     */
-    function setCookie(name, value, domain) {
-        if (!name || /^(?:expires|max\-age|path|domain|secure)$/i.test(name)) { return false; }
-
-        // infinity
-        var expires = "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
-        var path = '/';
-        var isSecure = false;
-
-        document.cookie = encodeURIComponent(name) +
-            "=" + encodeURIComponent(value) + expires +
-            (domain ? "; domain=" + domain : "") +
-            (path ? "; path=" + path : "") +
-            (isSecure ? "; secure" : "");
-    }
 
     /**
      * Set a value in both localStorage and cookies
@@ -1316,23 +1293,7 @@ angular.module('pancakesAngular').factory('storage', ["extlibs", "config", funct
      */
     function set(name, value) {
         localStorage.setItem(name, value);
-        setCookie(name, value, cookieDomain);
-    }
-
-    /**
-     * Helper function to get a cookie
-     * @param name
-     * @returns {*}
-     */
-    function getCookie(name) {
-        if (!name) { return null; }
-        return decodeURIComponent(
-                document.cookie.replace(
-                    new RegExp("(?:(?:^|.*;)\\s*" +
-                    encodeURIComponent(name).replace(/[\-\.\+\*]/g, "\\$&") +
-                    "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1"
-                )
-            ) || null;
+        $cookies.put(name, value, { domain: cookieDomain });
     }
 
     /**
@@ -1341,33 +1302,7 @@ angular.module('pancakesAngular').factory('storage', ["extlibs", "config", funct
      * @param name
      */
     function get(name) {
-        return localStorage.getItem(name) || getCookie(name);
-    }
-
-    /**
-     * Check to see if a cookie exists
-     * @param name
-     * @returns {boolean}
-     */
-    //function cookieExists(name) {
-    //    if (!name) { return false; }
-    //    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-    //}
-
-    /**
-     * Remove a cookie
-     * @param name
-     * @param domain
-     * @returns {boolean}
-     */
-    function removeCookie(name, domain) {
-        //if (!cookieExists(name)) { return false; }
-
-        var path = '/';
-        document.cookie = encodeURIComponent(name) +
-            "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
-            (domain ? "; domain=" + domain : "") +
-            (path ? "; path=" + path : "");
+        return localStorage.getItem(name) || $cookies.get(name);
     }
 
     /**
@@ -1376,15 +1311,12 @@ angular.module('pancakesAngular').factory('storage', ["extlibs", "config", funct
      */
     function remove(name) {
         localStorage.removeItem(name);
-        removeCookie(name, cookieDomain);
+        $cookies.remove(name, { domain: cookieDomain });
     }
 
     return {
-        setCookie: setCookie,
         set: set,
-        getCookie: getCookie,
         get: get,
-        removeCookie: removeCookie,
         remove: remove
     };
 }]);
