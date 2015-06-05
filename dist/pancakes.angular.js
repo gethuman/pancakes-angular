@@ -1307,7 +1307,7 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
      */
     function get(name) {
         return localStorage.getItem(name) ||
-            _.isFunction($cookies.getItem) ? $cookies.get(name) : $cookies[name];
+            _.isFunction($cookies.get) ? $cookies.get(name) : $cookies[name];
     }
 
     /**
