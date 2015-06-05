@@ -1282,7 +1282,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  *
  * This is used to store stuff in localStorage and cookies at same time
  */
-angular.module('pancakesAngular').factory('storage', ["extlibs", "config", "$cookies", function (extlibs, config, $cookies) {
+angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", "$cookies", function (_, extlibs, config, $cookies) {
     var localStorage = extlibs.get('localStorage');
     var cookieDomain = config.security && config.security.cookie && config.security.cookie.domain;
 
@@ -1293,7 +1293,11 @@ angular.module('pancakesAngular').factory('storage', ["extlibs", "config", "$coo
      */
     function set(name, value) {
         localStorage.setItem(name, value);
-        $cookies.put(name, value, { domain: cookieDomain });
+
+        _.isFunction($cookies.put) ?
+            $cookies.put(name, value, { domain: cookieDomain }) :
+            $cookies[name] = value;
+
     }
 
     /**
@@ -1302,7 +1306,8 @@ angular.module('pancakesAngular').factory('storage', ["extlibs", "config", "$coo
      * @param name
      */
     function get(name) {
-        return localStorage.getItem(name) || $cookies.get(name);
+        return localStorage.getItem(name) ||
+            _.isFunction($cookies.getItem) ? $cookies.get(name) : $cookies[name];
     }
 
     /**
@@ -1311,7 +1316,10 @@ angular.module('pancakesAngular').factory('storage', ["extlibs", "config", "$coo
      */
     function remove(name) {
         localStorage.removeItem(name);
-        $cookies.remove(name, { domain: cookieDomain });
+
+        _.isFunction($cookies.remove) ?
+            $cookies.remove(name, { domain: cookieDomain }) :
+            $cookies[name] = null;
     }
 
     return {
