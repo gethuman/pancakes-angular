@@ -101,7 +101,7 @@ angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "c
 
         // if the jwt exists, add it to the request
         var jwt = storage.get('jwt');
-        if (jwt) {
+        if (jwt && jwt !== 'null') {  // hack fix; someone setting localStorage to 'null'
             apiOpts.headers = {
                 Authorization: jwt
             };
