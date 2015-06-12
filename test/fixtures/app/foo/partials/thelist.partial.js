@@ -1,16 +1,10 @@
 module.exports = {
-    scope: { question: '=' },
-    attachToScope: ['routeHelper', 'answerState'],
-    defaults: { myman: 'yes' },
+    scope:      { question: '=' },
+    defaults:   { myman: 'yes' },
+
+    attachToScope: ['answerState'],
     remodelOnScopeChange: ['question.answers', 'question.stats.count.answers'],
-    eventBusListeners: {
-        'start.up': function (modals) {
-            modals.show('yes');
-        },
-        'end.now': function (show) {
-            show.now();
-        }
-    },
+
     model: function (safe, activeUser) {
         return function (model) {
             model.isRelevanceSort = model.isRelevanceSort === undefined ?  true : model.isRelevanceSort;
@@ -18,7 +12,7 @@ module.exports = {
             model.canEditQuestion = safe.canEdit(model.question, activeUser, false);
         };
     },
-    serverPreProcessor: function (reply) {
+    serverPreprocessing: function (reply) {
         if ((new Date()).getTime() < 234) {
             reply().redirect('/again');
         }
@@ -65,6 +59,14 @@ module.exports = {
         $timeout(function () {
             $scope.val = true;
         }, 100);
+    },
+    eventBusListeners: {
+        'start.up': function (modals) {
+            modals.show('yes');
+        },
+        'end.now': function (show) {
+            show.now();
+        }
     },
     uiEventHandlers: {
         userClick: function ($scope) {

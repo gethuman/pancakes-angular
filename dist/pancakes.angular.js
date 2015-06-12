@@ -4,7 +4,7 @@
  *
  * The app definition for pancakes.angular
  */
-angular.module('pancakesAngular', []);
+angular.module('pancakesAngular', ['ngCookies']);
 
 /* jshint undef: false */
 
@@ -32,7 +32,7 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  *
  * For angular clients to make ajax calls to server
  */
-angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus, config, storage) {
+angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "config", "storage", function ($q, $http, eventBus, config, storage) {
 
     /**
      * Send call to the server and get a response
@@ -101,9 +101,9 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
 
         // if the jwt exists, add it to the request
         var jwt = storage.get('jwt');
-        if (jwt) {
+        if (jwt && jwt !== 'null') {  // hack fix; someone setting localStorage to 'null'
             apiOpts.headers = {
-                Authorization: 'Bearer ' + jwt
+                Authorization: jwt
             };
         }
 
@@ -142,7 +142,7 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
     return {
         send: send
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -150,7 +150,7 @@ angular.module('pancakesAngular').factory('ajax', function ($q, $http, eventBus,
  *
  * Simple utility for the href directives to utilize
  */
-angular.module('pancakesAngular').factory('bindHref', function (tapTrack, stateHelper) {
+angular.module('pancakesAngular').factory('bindHref', ["tapTrack", "stateHelper", function (tapTrack, stateHelper) {
 
     return function bind(scope, elem, attrs, value) {
         var name = elem.length && elem[0].localName;
@@ -166,7 +166,7 @@ angular.module('pancakesAngular').factory('bindHref', function (tapTrack, stateH
             });
         }
     };
-});
+}]);
 ///**
 // * Author: Jeff Whelpley
 // * Date: 11/3/14
@@ -543,19 +543,19 @@ angular.module('pancakesAngular').factory('casing', function () {
  *
  * Client side implementation of pancakes.utensils.chainPromises()
  */
-angular.module('pancakesAngular').factory('chainPromises', function ($q) {
+angular.module('pancakesAngular').factory('chainPromises', ["$q", function ($q) {
     return function chainPromises(calls, val) {
         if (!calls || !calls.length) { return $q.when(val); }
         return calls.reduce($q.when, $q.when(val));
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * Track stats to google analytics upon state changes
  */
-angular.module('pancakesAngular').factory('clientAnalytics', function ($window, $location, eventBus) {
+angular.module('pancakesAngular').factory('clientAnalytics', ["$window", "$location", "eventBus", function ($window, $location, eventBus) {
 
     /**
      * Sent to google using the _gaq object that should be loaded on the window
@@ -576,14 +576,14 @@ angular.module('pancakesAngular').factory('clientAnalytics', function ($window, 
     return {
         captureCurrentPath: captureCurrentPath
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * Initial client data thta is in the DOM
  */
-angular.module('pancakesAngular').factory('clientData', function ($window) {
+angular.module('pancakesAngular').factory('clientData', ["$window", function ($window) {
     var clientData = $window.clientData || {};
 
     /**
@@ -599,7 +599,7 @@ angular.module('pancakesAngular').factory('clientData', function ($window) {
     return {
         get: get
     };
-});
+}]);
 
 /**
  * Copyright 2014 GetHuman LLC
@@ -609,7 +609,7 @@ angular.module('pancakesAngular').factory('clientData', function ($window) {
  * Client side event bus is essentially an isolated scope that
  * has been enhanced with a couple convenience functions
  */
-angular.module('pancakesAngular').factory('eventBus', function ($document, $rootScope) {
+angular.module('pancakesAngular').factory('eventBus', ["$document", "$rootScope", function ($document, $rootScope) {
 
     // the event bus is a new isolated scope
     var eventBus = $rootScope.$new(true);
@@ -635,7 +635,7 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
     };
 
     return eventBus;
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -643,7 +643,7 @@ angular.module('pancakesAngular').factory('eventBus', function ($document, $root
  *
  * Listens for log events and sends them to the console
  */
-angular.module('pancakesAngular').factory('clientLogReactor', function (extlibs, eventBus, config) {
+angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "eventBus", "config", function (extlibs, eventBus, config) {
     config = config || {};
 
     var raven = extlibs.get('Raven');
@@ -698,7 +698,7 @@ angular.module('pancakesAngular').factory('clientLogReactor', function (extlibs,
     return {
         log: log
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 10/15/14
@@ -719,7 +719,7 @@ angular.module('pancakesAngular').factory('config', function () {
  * Simple wrapper for getting external libraries outside Angular
  * from the client
  */
-angular.module('pancakesAngular').factory('extlibs', function ($window) {
+angular.module('pancakesAngular').factory('extlibs', ["$window", function ($window) {
 
     /**
      * Get an external client side library on the window or return empty object
@@ -734,14 +734,14 @@ angular.module('pancakesAngular').factory('extlibs', function ($window) {
     return {
         get: get
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * A function that sets focus on a particular element
  */
-angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) {
+angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", function ($timeout, extlibs) {
     var jQuery = extlibs.get('jQuery');
 
     /**
@@ -777,7 +777,7 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
         set: set,
         blur: blur
     };
-});
+}]);
 
 /**
  * Copyright 2014 GetHuman LLC
@@ -806,13 +806,14 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
     var attrPascal, type;
 
     // function used for each of the generic directives
-    function addDirective(directiveName, attrName, filterType, isBind, isBindOnce) {
+    function addDirective(directiveName, attrName, filterType, isBind, isBindOnce, isFilter) {
         app.directive(directiveName, ['i18n', 'config', function (i18n, config) {
 
             function setValue(scope, element, attrs, value) {
-                value = filterType === 'file' ?
-                    (config.staticFileRoot + value) :
-                    i18n.translate(value, scope);
+                value = !isFilter ? value :
+                    filterType === 'file' ?
+                        (config.staticFileRoot + value) :
+                        i18n.translate(value, scope);
 
                 attrName === 'text' ?
                     element.text(value) :
@@ -831,15 +832,13 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
                         var unwatch = scope.$watch(originalValue, function (value) {
                             if (value !== undefined && value !== null) {
                                 setValue(scope, element, attrs, value);
-
-                                // if bind once, we are unwatch after the first time
                                 if (isBindOnce && unwatch) { unwatch(); }
                             }
                         });
                     }
 
                     // else we are not binding, but we want to do some filtering
-                    else if (!isBind && filterType !== null) {
+                    else if (!isBind && isFilter && filterType !== null) {
 
                         // if the value contains {{ it means there is interpolation
                         if (originalValue.indexOf('{{') >= 0) {
@@ -853,6 +852,9 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
                             setValue(scope, element, attrs, originalValue);
                         }
                     }
+                    else {
+                        throw new Error('Not bind nor filter in generic addDirective for ' + originalValue);
+                    }
                 }
             };
         }]);
@@ -865,18 +867,18 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
 
             // no b-class because just adding class one time
             if (attr !== 'class') {
-                addDirective('b' + attrPascal, attr, null, true, false);
+                addDirective('b' + attrPascal, attr, null, true, false, false);
             }
 
-            addDirective('bo' + attrPascal, attr, null, true, true);
+            addDirective('bo' + attrPascal, attr, null, true, true, false);
 
             // if file then do f- and bf- for static file
             type = genericDirectives[attr];
             if (type) {
-                addDirective('f' + attrPascal, attr, type, false, false);
-                addDirective('fo' + attrPascal, attr, type, false, true);
-                addDirective('bf' + attrPascal, attr, type, true, false);
-                addDirective('bfo' + attrPascal, attr, type, true, true);
+                addDirective('f' + attrPascal, attr, type, false, false, true);
+                addDirective('fo' + attrPascal, attr, type, false, true, true);
+                addDirective('bf' + attrPascal, attr, type, true, false, true);
+                addDirective('bfo' + attrPascal, attr, type, true, true, true);
             }
         }
     }
@@ -890,7 +892,9 @@ angular.module('pancakesAngular').factory('focus', function ($timeout, extlibs) 
  */
 angular.module('pancakesAngular').factory('i18n', function () {
     return {
-        translate: function (val) { return val; }
+        translate: function (val) {
+            return val;
+        }
     };
 });
 /**
@@ -907,74 +911,11 @@ angular.module('pancakesAngular').factory('initialModel', function () {
 
 /**
  * Author: Jeff Whelpley
- * Date: 2/7/15
- *
- * Client version of the pageHelper in pancakes that is used on the server side
- */
-angular.module('pancakesAngular').factory('pageHelper', function (casing, routeHelper) {
-    var apps = {};
-    var pageHelper = {};
-
-    /**
-     * Register a page helper function
-     * @param appName
-     * @param routeName
-     * @param funcName
-     * @param func
-     */
-    pageHelper.register = function register(appName, routeName, funcName, func) {
-
-        // app and route name could be dot notation, so make them camel case
-        appName = casing.camelCase(appName, '.');
-        routeName = casing.camelCase(routeName, '.');
-
-        // make sure object is initialized
-        apps[appName] = apps[appName] || {};
-        apps[appName][routeName] = apps[appName][routeName] || {};
-
-        // we wrap the input function so we can add the routeHandler to the input options
-        function handler(opts) {
-            opts.routeHelper = routeHelper;
-            return func(opts);
-        }
-
-        // set handler in the object in case the user calls it dynamically
-        apps[appName][routeName][funcName] = handler;
-
-        // and add a convenience function name for example pageHelper.formatUrlAnswersPost(opts)
-        var name = casing.camelCase([funcName, appName, routeName].join('.'), '.');
-        this[name] = handler;
-
-        // also since many times the route name is unique, pageHelper.formatUrlPost()
-        name = casing.camelCase([funcName, routeName].join('.'), '.');
-        this[name] = handler;
-
-        // finally if just call the function name, let them pass in the appName and routeName
-        // pageHelper.formatUrl(appName, routeName, opts);
-        /*
-        this[funcName] = function (appName, routeName, opts) {
-            return handler(opts);
-        };
-        */
-
-        if ( !this[funcName] ) {
-            this[funcName] = function (appName, routeName, opts) {
-                return apps[appName][routeName][funcName](opts);
-            };
-        }
-
-    };
-
-    return pageHelper;
-});
-
-/**
- * Author: Jeff Whelpley
  * Date: 4/22/14
  *
  * Change the HTML page settings
  */
-angular.module('pancakesAngular').factory('pageSettings', function ($window, $rootElement) {
+angular.module('pancakesAngular').factory('pageSettings', ["$window", "$rootElement", function ($window, $rootElement) {
 
     /**
      * Set the page title and description
@@ -1006,7 +947,7 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
         updateHead: updateHead,
         updatePageStyle: updatePageStyle
     };
-});
+}]);
 
 
 /**
@@ -1015,7 +956,7 @@ angular.module('pancakesAngular').factory('pageSettings', function ($window, $ro
  *
  * This module will get the query params and raise an event for any notifications
  */
-angular.module('pancakesAngular').factory('queryParams', function (_, $timeout, $location, eventBus, stateHelper) {
+angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$location", "eventBus", "stateHelper", function (_, $timeout, $location, eventBus, stateHelper) {
     var params = {};
 
     eventBus.on('$locationChangeSuccess', function () {
@@ -1048,23 +989,14 @@ angular.module('pancakesAngular').factory('queryParams', function (_, $timeout, 
     });
 
     return params;
-});
-/**
- * Author: Jeff Whelpley
- * Date: 2/7/15
- *
- * This should be overriden by an implementing project
- */
-angular.module('pancakesAngular').factory('routeHelper', function () {
-    return {};
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 2/16/15
  *
  * Don't apply if already digest cycle in process
  */
-angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
+angular.module('pancakesAngular').factory('safeApply', ["$rootScope", function ($rootScope) {
     return function safeApply(fn) {
         var phase = $rootScope.$root.$$phase;
         if (phase === '$apply' || phase === '$digest') {
@@ -1075,7 +1007,7 @@ angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
             $rootScope.$apply(fn);
         }
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -1083,7 +1015,7 @@ angular.module('pancakesAngular').factory('safeApply', function ($rootScope) {
  *
  *
  */
-angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
+angular.module('pancakesAngular').factory('serviceHelper', ["ajax", function (ajax) {
 
     /**
      * Generate a service method
@@ -1152,7 +1084,7 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
         genService: genService,
         genModel: genModel
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -1160,7 +1092,7 @@ angular.module('pancakesAngular').factory('serviceHelper', function (ajax) {
  *
  * This client side service is used to help with state changes
  */
-angular.module('pancakesAngular').factory('stateHelper', function ($window, $timeout, $location, _, eventBus) {
+angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout", "$location", "_", "eventBus", function ($window, $timeout, $location, _, eventBus) {
     var preventStateChange = false;
     var preventLocationChange = false;
 
@@ -1256,7 +1188,7 @@ angular.module('pancakesAngular').factory('stateHelper', function ($window, $tim
         removeQueryParams: removeQueryParams,
         getCurrentUrl: getCurrentUrl
     };
-});
+}]);
 /**
  * Copyright 2014 GetHuman LLC
  * Author: Jeff Whelpley
@@ -1287,13 +1219,16 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
      * and load it into the UI Router
      *
      * @param $stateProvider
+     * @param appName
      * @param routes
      * @param resolves
+     * @param isMobile
      */
-    this.loadStates = function loadStates($stateProvider, routes, resolves) {
+    this.loadStates = function loadStates($stateProvider, appName, routes, resolves, isMobile) {
         var stateNames = {};
         angular.forEach(routes, function (route) {
             angular.forEach(route.urls, function (url, idx) {
+                var sideview = route.sideview || 'default';
                 var initialModel = resolves[route.name] || function () { return {}; };
                 var stateName = (route.name + (idx === 0 ? '' : '--' + idx)).replace(/\./g, '-');
                 var stateConfig = {
@@ -1315,6 +1250,13 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         }
                     }
                 };
+
+                if (!isMobile) {
+                    stateConfig.views.sideview = {
+                        controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
+                        templateUrl:    'templates/' + appName + '.sideview.' + sideview
+                    };
+                }
 
                 // need to make sure state names are unique so just add a timestamp if nothing else
                 if (stateNames[stateName]) { stateName += (new Date()).getTime(); }
@@ -1340,32 +1282,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  *
  * This is used to store stuff in localStorage and cookies at same time
  */
-angular.module('pancakesAngular').factory('storage', function (extlibs, config) {
+angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", "$cookies", function (_, extlibs, config, $cookies) {
     var localStorage = extlibs.get('localStorage');
-    var cookieDomain = config.cookieDomain;
-    var document = window.document;
-
-    /**
-     * Set a cookie value
-     * @param name
-     * @param value
-     * @param domain
-     * @returns {boolean}
-     */
-    function setCookie(name, value, domain) {
-        if (!name || /^(?:expires|max\-age|path|domain|secure)$/i.test(name)) { return false; }
-
-        // infinity
-        var expires = "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
-        var path = '/';
-        var isSecure = false;
-
-        document.cookie = encodeURIComponent(name) +
-            "=" + encodeURIComponent(value) + expires +
-            (domain ? "; domain=" + domain : "") +
-            (path ? "; path=" + path : "") +
-            (isSecure ? "; secure" : "");
-    }
+    var cookieDomain = config.security && config.security.cookie && config.security.cookie.domain;
 
     /**
      * Set a value in both localStorage and cookies
@@ -1374,23 +1293,11 @@ angular.module('pancakesAngular').factory('storage', function (extlibs, config) 
      */
     function set(name, value) {
         localStorage.setItem(name, value);
-        setCookie(name, value, cookieDomain);
-    }
 
-    /**
-     * Helper function to get a cookie
-     * @param name
-     * @returns {*}
-     */
-    function getCookie(name) {
-        if (!name) { return null; }
-        return decodeURIComponent(
-                document.cookie.replace(
-                    new RegExp("(?:(?:^|.*;)\\s*" +
-                    encodeURIComponent(name).replace(/[\-\.\+\*]/g, "\\$&") +
-                    "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1"
-                )
-            ) || null;
+        _.isFunction($cookies.put) ?
+            $cookies.put(name, value, { domain: cookieDomain }) :
+            $cookies[name] = value;
+
     }
 
     /**
@@ -1399,33 +1306,8 @@ angular.module('pancakesAngular').factory('storage', function (extlibs, config) 
      * @param name
      */
     function get(name) {
-        return localStorage.getItem(name) || getCookie(name);
-    }
-
-    /**
-     * Check to see if a cookie exists
-     * @param name
-     * @returns {boolean}
-     */
-    //function cookieExists(name) {
-    //    if (!name) { return false; }
-    //    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-    //}
-
-    /**
-     * Remove a cookie
-     * @param name
-     * @param domain
-     * @returns {boolean}
-     */
-    function removeCookie(name, domain) {
-        //if (!cookieExists(name)) { return false; }
-
-        var path = '/';
-        document.cookie = encodeURIComponent(name) +
-            "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
-            (domain ? "; domain=" + domain : "") +
-            (path ? "; path=" + path : "");
+        return localStorage.getItem(name) ||
+            (_.isFunction($cookies.get) ? $cookies.get(name) : $cookies[name]);
     }
 
     /**
@@ -1434,18 +1316,18 @@ angular.module('pancakesAngular').factory('storage', function (extlibs, config) 
      */
     function remove(name) {
         localStorage.removeItem(name);
-        removeCookie(name, cookieDomain);
+
+        _.isFunction($cookies.remove) ?
+            $cookies.remove(name, { domain: cookieDomain }) :
+            $cookies[name] = null;
     }
 
     return {
-        setCookie: setCookie,
         set: set,
-        getCookie: getCookie,
         get: get,
-        removeCookie: removeCookie,
         remove: remove
     };
-});
+}]);
 
 /**
  * Author: Jeff Whelpley
@@ -1456,7 +1338,7 @@ angular.module('pancakesAngular').factory('storage', function (extlibs, config) 
  * This allows us to create events off touch instead of the 300ms delay for click
  * events.
  */
-angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
+angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($timeout) {
 
     // keep track of state of the tap with this boolean
     var inProgress = false;
@@ -1509,7 +1391,7 @@ angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
     return {
         bind: bind
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 10/16/14
@@ -1517,7 +1399,7 @@ angular.module('pancakesAngular').factory('tapTrack', function ($timeout) {
  * This has utilities that are used to help work with generated
  * template code
  */
-angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, config, pageSettings, eventBus) {
+angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "config", "pageSettings", "eventBus", function ($q, $injector, config, pageSettings, eventBus) {
 
     /**
      * Given a set of default values, add them to the scope if
@@ -1918,4 +1800,4 @@ angular.module('pancakesAngular').factory('tplHelper', function ($q, $injector, 
         addEventHandlers: addEventHandlers,
         onClientLoad: onClientLoad
     };
-});
+}]);
