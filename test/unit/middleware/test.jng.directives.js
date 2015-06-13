@@ -160,6 +160,28 @@ describe('UNIT ' + name, function () {
             actual.should.equal(expected);
 
         });
+        it('should ensure that bo-title works with foo[bar[\'baz\']]', function () {
+            var obj = {};
+            jangular.addShortcutsToScope(obj);
+
+            jng.initDirectives.call(context, { componentPrefix: 'pan' });
+            var template = obj.div({ 'bo-title': 'foo[bar[\'baz\']]' });
+            var expected = '<div bo-title="foo[bar[\'baz\']]" title="holy crap!"></div>';
+            var actual =    jangular.render(template, {foo: {wah: 'holy crap!'}, bar: {baz: 'wah'}});
+            actual.should.equal(expected);
+
+        });
+        it('should ensure that bo-title works with foo[bar[\'baz\']]', function () {
+            var obj = {};
+            jangular.addShortcutsToScope(obj);
+
+            jng.initDirectives.call(context, { componentPrefix: 'pan' });
+            var template = obj.div({ 'bo-title': 'foo[bar[\'baz\']][wah.zam][zoom].doot' });
+            var expected = '<div bo-title="foo[bar[\'baz\']][wah.zam][zoom].doot" title="holy crap!"></div>';
+            var actual =    jangular.render(template, {foo: {wah: { hey: {goo: {doot: 'holy crap!'}}}}, bar: {baz: 'wah'}, wah: {zam: 'hey'}, zoom: 'goo'});
+            actual.should.equal(expected);
+
+        });
     });
 
     describe('initDirectives()', function () {
