@@ -171,7 +171,7 @@ describe('UNIT ' + name, function () {
             actual.should.equal(expected);
 
         });
-        it('should ensure that bo-title works with foo[bar[\'baz\']]', function () {
+        it('should ensure that bo-title works with foo[bar[\'baz\']][wah.zam][zoom].doot', function () {
             var obj = {};
             jangular.addShortcutsToScope(obj);
 
