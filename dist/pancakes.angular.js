@@ -1239,6 +1239,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                             return activeUser.init();
                         }]
                     },
+                    data: route.data,
                     onEnter: ['$rootScope', function ($rootScope) {
                         $rootScope.stateData = route.data || {};
                         $rootScope.pageLoadTimestamp = (new Date()).getTime();
