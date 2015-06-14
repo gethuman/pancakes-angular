@@ -1226,7 +1226,6 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
      */
     this.loadStates = function loadStates($stateProvider, appName, routes, resolves, isMobile) {
         var stateNames = {};
-        console.log('Loading states');
         angular.forEach(routes, function (route) {
             angular.forEach(route.urls, function (url, idx) {
                 var sideview = route.sideview || 'default';
