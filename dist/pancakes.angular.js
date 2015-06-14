@@ -1226,6 +1226,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
      */
     this.loadStates = function loadStates($stateProvider, appName, routes, resolves, isMobile) {
         var stateNames = {};
+        console.log('Loading states');
         angular.forEach(routes, function (route) {
             angular.forEach(route.urls, function (url, idx) {
                 var sideview = route.sideview || 'default';
@@ -1251,6 +1252,13 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         }
                     }
                 };
+                if ( route.data ) {
+                    stateConfig.data = route.data;
+                }
+                if ( route.ads ) {
+                    stateConfig.data = stateConfig.data || {};
+                    stateConfig.data.ads = route.ads;
+                }
 
                 if (!isMobile) {
                     stateConfig.views.sideview = {
