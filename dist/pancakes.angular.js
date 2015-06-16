@@ -1142,15 +1142,7 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
      * @returns {string}
      */
     function getCurrentUrl() {
-        var currentUrl = 'http://' + $location.host();
-        var port = $location.port();
-
-        if (port !== 80) {
-            currentUrl += ':' + port;
-        }
-
-        currentUrl += $location.url();
-        return currentUrl;
+        return $location.absUrl();
     }
 
     // so, this is a total hack, but basically this combination of variables and
