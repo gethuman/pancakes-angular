@@ -1,6 +1,6 @@
 {
   "name": "pancakes-angular",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Pancakes plugin for Angular",
   "main": "lib/pancakes.angular.plugin.js",
   "repository": {
@@ -28,12 +28,6 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.2.0",
     "jangular": "^0.2.19",
-    "karma": "^0.12.36",
-    "karma-coverage": "^0.4.1",
-    "karma-jquery": "^0.1.0",
-    "karma-mocha": "^0.1.10",
-    "karma-phantomjs-launcher": "^0.2.0",
-    "karma-sinon-chai": "^1.0.0",
     "lodash": "~3.9.3",
     "lru-cache": "^2.6.4",
     "mocha": "^2.2.5",
@@ -48,6 +42,12 @@
     "jshint": "^2.8.0",
     "pancakes": "^0.1.79",
     "prettyjson": "^1.1.2",
-    "taste": "^0.1.69"
+    "taste": "^0.1.69",
+    "karma": "^0.12.36",
+    "karma-coverage": "^0.4.1",
+    "karma-jquery": "^0.1.0",
+    "karma-mocha": "^0.1.10",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "karma-sinon-chai": "^1.0.0"
   }
 }
