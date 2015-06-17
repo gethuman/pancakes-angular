@@ -25,8 +25,8 @@ angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
 {{?}}
 
 angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
-    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', '$state', 'tplHelper',
-    function ({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, $state, tplHelper) {
+    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', '$state', '$q', 'tplHelper',
+    function ({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, $state, $q, tplHelper) {
 
         {{~it.ngrefs :param}}
         var {{=param}} = angular;
@@ -64,11 +64,13 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
             end: null
         }, {{=it.directiveScope}});{{?}}
 
-        {{? it.useRemodelOnWatch }}tplHelper.remodelOnScopeChange($scope, {{=it.remodelWatchers}});{{?}}
-        {{? it.useRemodelOnEvent }}tplHelper.remodelOnEvent($scope, {{=it.remodelEvents}});{{?}}
-        {{? it.useRerenderOnWatch}}tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});{{?}}
-        {{? it.useRerenderOnEvent}}tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});{{?}}
-        {{? it.clientLoadExists  }}tplHelper.onClientLoad({{=it.clientLoadFn}});{{?}}
+        $q.when(true)
+        {{? it.useRemodelOnWatch }}.then(function() {tplHelper.remodelOnScopeChange($scope, {{=it.remodelWatchers}});}){{?}}
+        {{? it.useRemodelOnEvent }}.then(function() {tplHelper.remodelOnEvent($scope, {{=it.remodelEvents}});}){{?}}
+        {{? it.useRerenderOnWatch}}.then(function() {tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});}){{?}}
+        {{? it.useRerenderOnEvent}}.then(function() {tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});}){{?}}
+        {{? it.clientLoadExists  }}.then(function() {tplHelper.onClientLoad({{=it.clientLoadFn}});}){{?}}
+        .then(function() { return true; });
 
         {{=it.body}}
     }
