@@ -1142,15 +1142,7 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
      * @returns {string}
      */
     function getCurrentUrl() {
-        var currentUrl = 'http://' + $location.host();
-        var port = $location.port();
-
-        if (port !== 80) {
-            currentUrl += ':' + port;
-        }
-
-        currentUrl += $location.url();
-        return currentUrl;
+        return $location.absUrl();
     }
 
     // so, this is a total hack, but basically this combination of variables and
@@ -1251,10 +1243,10 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         }
                     }
                 };
-                if ( route.data ) {
+                if (route.data) {
                     stateConfig.data = route.data;
                 }
-                if ( route.ads ) {
+                if (route.ads) {
                     stateConfig.data = stateConfig.data || {};
                     stateConfig.data.ads = route.ads;
                 }
@@ -1292,7 +1284,19 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
  */
 angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", "$cookies", function (_, extlibs, config, $cookies) {
     var localStorage = extlibs.get('localStorage');
-    var cookieDomain = config.security && config.security.cookie && config.security.cookie.domain;
+    var cookieDomain = config.cookieDomain;
+
+    /**
+     * Remove a value from localStorage and cookies
+     * @param name
+     */
+    function remove(name) {
+        localStorage.removeItem(name);
+
+        _.isFunction($cookies.remove) ?
+            $cookies.remove(name, { domain: cookieDomain }) :
+            $cookies[name] = null;
+    }
 
     /**
      * Set a value in both localStorage and cookies
@@ -1300,6 +1304,13 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
      * @param value
      */
     function set(name, value) {
+
+        // if no value then remove
+        if (!value) {
+            remove(name);
+            return;
+        }
+
         localStorage.setItem(name, value);
 
         _.isFunction($cookies.put) ?
@@ -1314,20 +1325,16 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
      * @param name
      */
     function get(name) {
-        return localStorage.getItem(name) ||
-            (_.isFunction($cookies.get) ? $cookies.get(name) : $cookies[name]);
-    }
+        var value = localStorage.getItem(name);
 
-    /**
-     * Remove a value from localStorage and cookies
-     * @param name
-     */
-    function remove(name) {
-        localStorage.removeItem(name);
+        if (!value) {
+            value = (_.isFunction($cookies.get) ? $cookies.get(name) : $cookies[name]);
+            if (value) {
+                localStorage.setItem(name, value);
+            }
+        }
 
-        _.isFunction($cookies.remove) ?
-            $cookies.remove(name, { domain: cookieDomain }) :
-            $cookies[name] = null;
+        return value;
     }
 
     return {
