@@ -31,7 +31,7 @@
     "lodash": "~3.9.3",
     "lru-cache": "^2.6.4",
     "mocha": "^2.2.5",
-    "pancakes": "^0.1.81",
+    "pancakes": "^0.1.82",
     "q": "^1.4.1",
     "streamqueue": "^1.1.0"
   },
@@ -40,7 +40,7 @@
     "dot": "^1.0.3",
     "gulp": "^3.9.0",
     "jshint": "^2.8.0",
-    "pancakes": "^0.1.81",
+    "pancakes": "^0.1.82",
     "prettyjson": "^1.1.2",
     "taste": "^0.1.70",
     "karma": "^0.12.36",
