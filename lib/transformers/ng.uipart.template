@@ -71,7 +71,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.useRerenderOnWatch}}.then(function() {return tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});}){{?}}
         {{? it.useRerenderOnEvent}}.then(function() {return tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});}){{?}}
         {{? it.clientLoadExists  }}.then(function() {return tplHelper.onClientLoad({{=it.clientLoadFn}});}){{?}}
-        .then(function() { return true; }).done();
+        .then(function() { return true; }).catch(function(e) { console.log('Model/render error: ' + e); });
 
         {{=it.body}}
     }

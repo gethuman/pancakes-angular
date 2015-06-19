@@ -1251,6 +1251,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     stateConfig.data.ads = route.ads;
                 }
 
+                //TODO: need to have better way of not including sideview
                 if (!isMobile) {
                     stateConfig.views.sideview = {
                         controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
