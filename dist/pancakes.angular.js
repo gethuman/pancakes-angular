@@ -1498,6 +1498,11 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
         if (!fnOrObj) { return; }
         directiveScope = directiveScope || {};
 
+        var formerRemodel = function() { return true; }; // return true in case expecting a promise
+        if ( scope.remodel ) {
+            formerRemodel = scope.remodel;
+        }
+
         // remodeling will call the model function
         scope.remodel = function () {
             var locals = {
@@ -1521,7 +1526,8 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
 
                                 scope[modelName] = modelVal;
                             });
-                            return true;
+                            //return true;
+                            return formerRemodel();
                         });
                 }
                 // else it should be an object so loop through
@@ -1550,7 +1556,9 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
                             updates.push($q.when(scope[name] = val));  // think we can just do this instead of larger wrapper
                         }
                     });
-                    return $q.all(updates);
+                    return $q.all(updates).then(function() {
+                        return formerRemodel();
+                    });
                 }
 
             }
@@ -1631,7 +1639,7 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
         // set up the watchers if they exist
         if (watchers && cb) {
             for (i = 0; i < watchers.length; i++) {
-                handler = generateScopeChangeHandler(cb);
+                handler = generateScopeChangeHandler(cb, watchers);
                 watchExp = watchers[i];
                 firstChar = watchExp.charAt(0);
                 if (firstChar === '^') {
