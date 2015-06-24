@@ -1498,8 +1498,9 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
         if (!fnOrObj) { return; }
         directiveScope = directiveScope || {};
 
-        var formerRemodel = function() { return true; }; // return true in case expecting a promise
-        if ( scope.remodel ) {
+        // return true in case expecting a promise
+        var formerRemodel = function () { return true; };
+        if (scope.remodel) {
             formerRemodel = scope.remodel;
         }
 
@@ -1548,7 +1549,8 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
 
                             updates.push($q.when($injector.invoke(val, null, locals))
                                 .then(function (model) {
-                                    return (scope[name] = model);
+                                    scope[name] = model;
+                                    return model;
                                 }));
                         }
                         // else just set the value on scope[name]
@@ -1556,7 +1558,7 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
                             updates.push($q.when(scope[name] = val));  // think we can just do this instead of larger wrapper
                         }
                     });
-                    return $q.all(updates).then(function() {
+                    return $q.all(updates).then(function () {
                         return formerRemodel();
                     });
                 }
