@@ -1251,6 +1251,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     stateConfig.data.ads = route.ads;
                 }
 
+                //TODO: need to have better way of not including sideview
                 if (!isMobile) {
                     stateConfig.views.sideview = {
                         controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
@@ -1497,6 +1498,11 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
         if (!fnOrObj) { return; }
         directiveScope = directiveScope || {};
 
+        var formerRemodel = function() { return true; }; // return true in case expecting a promise
+        if ( scope.remodel ) {
+            formerRemodel = scope.remodel;
+        }
+
         // remodeling will call the model function
         scope.remodel = function () {
             var locals = {
@@ -1511,7 +1517,7 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
                 if (angular.isFunction(fnOrObj) ||
                     (angular.isArray(fnOrObj) && angular.isFunction(fnOrObj[fnOrObj.length - 1]))) {
 
-                    $q.when($injector.invoke(fnOrObj, null, locals))
+                    return $q.when($injector.invoke(fnOrObj, null, locals))
                         .then(function (model) {
                             angular.forEach(model, function (modelVal, modelName) {
                                 if (directiveScope[modelName]) {
@@ -1520,10 +1526,13 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
 
                                 scope[modelName] = modelVal;
                             });
+                            //return true;
+                            return formerRemodel();
                         });
                 }
                 // else it should be an object so loop through
                 else {
+                    var updates = [];
                     angular.forEach(fnOrObj, function (val, name) {
                         if (name === 'end') {
                             return;
@@ -1537,15 +1546,18 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
                         if (angular.isFunction(val) ||
                             (angular.isArray(val) && angular.isFunction(val[val.length - 1]))) {
 
-                            $q.when($injector.invoke(val, null, locals))
+                            updates.push($q.when($injector.invoke(val, null, locals))
                                 .then(function (model) {
-                                    scope[name] = model;
-                                });
+                                    return (scope[name] = model);
+                                }));
                         }
                         // else just set the value on scope[name]
                         else {
-                            scope[name] = val;
+                            updates.push($q.when(scope[name] = val));  // think we can just do this instead of larger wrapper
                         }
+                    });
+                    return $q.all(updates).then(function() {
+                        return formerRemodel();
                     });
                 }
 
@@ -1557,7 +1569,11 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
         };
 
         // for partials, we want to remodel right away
-        if (isPartial) { scope.remodel(); }
+        if (isPartial) {
+            return scope.remodel();
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -1623,7 +1639,7 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
         // set up the watchers if they exist
         if (watchers && cb) {
             for (i = 0; i < watchers.length; i++) {
-                handler = generateScopeChangeHandler(cb);
+                handler = generateScopeChangeHandler(cb, watchers);
                 watchExp = watchers[i];
                 firstChar = watchExp.charAt(0);
                 if (firstChar === '^') {
@@ -1649,9 +1665,9 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
     function generateRerenderCallback(scope) {
         return function () {
             var remodel = scope.remodel || function () { return true; };
-            $q.when(remodel(scope))
+            return $q.when(remodel(scope))
                 .then(function () {
-                    scope.rerenderComponent();
+                    return scope.rerenderComponent();
                 });
         };
     }
