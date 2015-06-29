@@ -8,8 +8,8 @@ var _       = require('lodash');
 var karma   = require('karma').server;
 var path    = require('path');
 var ngCode  = [
-    path.normalize(__dirname + '/../node_modules/angular/angular.js'),
-    path.normalize(__dirname + '/../node_modules/angular-mocks/angular-mocks.js')
+    path.join(__dirname, '../node_modules/angular/angular.js'),
+    path.join(__dirname, '../node_modules/angular-mocks/angular-mocks.js')
 ];
 
 module.exports = function (gulp, opts) {

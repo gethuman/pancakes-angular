@@ -44,7 +44,7 @@ describe('UNIT ' + name, function () {
             var actual = transformer.stringify.call(context, validations);
             actual.should.equal(expected);
         });
-        
+
         it('should change regex and types to string values', function () {
             var validations = {
                 blah: { fld1: { ui: true, match: /asdf/ } },
