@@ -117,8 +117,8 @@ angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "c
 
         // finally make the http call
         $http(apiOpts)
-            .success(function (data) {
-                deferred.resolve(data);
+            .success(function (respData) {
+                deferred.resolve(respData);
             })
             .error(function (err) {
                 if (err) {
@@ -517,8 +517,8 @@ angular.module('pancakesAngular').factory('casing', function () {
             delims = [delims];
         }
 
-        _.each(delims, function (delim) {
-            var codeParts = str.split(delim);
+        _.each(delims, function (adelim) {
+            var codeParts = str.split(adelim);
             var i, codePart;
 
             for (i = 1; i < codeParts.length; i++) {
@@ -661,6 +661,7 @@ angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "event
      */
     function log(event, logData) {
         if (useConsole) {
+            /* eslint no-console:0 */
             console.log(logData + ' || ' + JSON.stringify(logData));
         }
 
@@ -1000,10 +1001,11 @@ angular.module('pancakesAngular').factory('safeApply', ["$rootScope", function (
     return function safeApply(fn) {
         var phase = $rootScope.$root.$$phase;
         if (phase === '$apply' || phase === '$digest') {
-            if (fn && (typeof(fn) === 'function')) {
+            if (fn && (typeof fn === 'function')) {
                 fn();
             }
-        } else {
+        }
+        else {
             $rootScope.$apply(fn);
         }
     };
@@ -1494,7 +1496,7 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
      * @param directiveScope
      */
     function generateRemodel(scope, ctrlName, isPartial, fnOrObj, directiveScope) {
-        if (!fnOrObj) { return; }
+        if (!fnOrObj) { return true; }
         directiveScope = directiveScope || {};
 
         // return true in case expecting a promise
@@ -1564,17 +1566,14 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
 
             }
             catch (ex) {
+                /* eslint no-console:0 */
                 console.log(ctrlName + ' has err ');
                 throw ex;
             }
         };
 
         // for partials, we want to remodel right away
-        if (isPartial) {
-            return scope.remodel();
-        } else {
-            return true;
-        }
+        return isPartial ? scope.remodel() : true;
     }
 
     /**
@@ -1714,7 +1713,7 @@ angular.module('pancakesAngular').factory('tplHelper', ["$q", "$injector", "conf
 
             // make sure handlers are destroyed along with scope
             scope.$on('$destroy', function () {
-                for (var i = 0; i < fns.length; i++) {
+                for (i = 0; i < fns.length; i++) {
                     fns[i]();
                 }
             });

@@ -39,7 +39,12 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}
 
         $q.when(true)
-        {{? it.remodelFnExists   }}.then(function() {return tplHelper.generateRemodel($scope, '{{=it.controllerName}}', {{=it.isPartial}}, {{=it.remodelFn}}, {{=it.directiveScope}});}){{?}}
+        {{? it.remodelFnExists }}
+            .then(function() {
+                console.log('blah');
+                return tplHelper.generateRemodel($scope, '{{=it.controllerName}}', {{=it.isPartial}}, {{=it.remodelFn}}, {{=it.directiveScope}});
+            })
+        {{?}}
 
         {{? it.eventBusListeners }}.then(function() {return tplHelper.registerListeners($scope, {
         {{ for (var lName in it.eventBusListeners) { }}
