@@ -41,7 +41,6 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         $q.when(true)
         {{? it.remodelFnExists }}
             .then(function() {
-                console.log('blah');
                 return tplHelper.generateRemodel($scope, '{{=it.controllerName}}', {{=it.isPartial}}, {{=it.remodelFn}}, {{=it.directiveScope}});
             })
         {{?}}
