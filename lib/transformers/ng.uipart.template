@@ -38,6 +38,14 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.isPage            }}tplHelper.addInitModel($scope, initialModel, '{{=it.uiPartName}}');{{?}}
         {{? it.rerenderExists    }}tplHelper.generateRerender($scope, $state);{{?}}
 
+        {{? it.validations       }}
+        tplHelper.addValidations($scope, {
+        {{ for (var vName in it.validations) { }}
+            '{{=vName}}': {{=it.validations[vName]}},
+        {{ } }}
+            end: null
+        });{{?}}
+
         $q.when(true)
         {{? it.remodelFnExists }}
             .then(function() {
@@ -54,12 +62,6 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.uiEventHandlers   }}.then(function() {return tplHelper.addEventHandlers($scope, '{{=it.controllerName}}', {
         {{ for (var uName in it.uiEventHandlers) { }}
             '{{=uName}}': {{=it.uiEventHandlers[uName]}},
-        {{ } }}
-            end: null
-        });}){{?}}
-        {{? it.validations       }}.then(function() {return tplHelper.addValidations($scope, {
-        {{ for (var vName in it.validations) { }}
-            '{{=vName}}': {{=it.validations[vName]}},
         {{ } }}
             end: null
         });}){{?}}
