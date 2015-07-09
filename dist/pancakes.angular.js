@@ -1147,6 +1147,13 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
         return $location.absUrl();
     }
 
+    /**
+     * Get the current user agent
+     */
+    function getUserAgent() {
+        return $window.navigator.userAgent;
+    }
+
     // so, this is a total hack, but basically this combination of variables and
     // event handlers allows us to change the URL without changing the UI router state
     eventBus.on('$stateChangeStart', function (event) {
@@ -1180,7 +1187,8 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
         goToUrl: goToUrl,
         switchUrl: switchUrl,
         removeQueryParams: removeQueryParams,
-        getCurrentUrl: getCurrentUrl
+        getCurrentUrl: getCurrentUrl,
+        getUserAgent: getUserAgent
     };
 }]);
 /**
