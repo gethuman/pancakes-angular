@@ -1147,6 +1147,13 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
         return $location.absUrl();
     }
 
+    /**
+     * Get the current user agent
+     */
+    function getUserAgent() {
+        return $window.navigator.userAgent;
+    }
+
     // so, this is a total hack, but basically this combination of variables and
     // event handlers allows us to change the URL without changing the UI router state
     eventBus.on('$stateChangeStart', function (event) {
@@ -1180,7 +1187,8 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
         goToUrl: goToUrl,
         switchUrl: switchUrl,
         removeQueryParams: removeQueryParams,
-        getCurrentUrl: getCurrentUrl
+        getCurrentUrl: getCurrentUrl,
+        getUserAgent: getUserAgent
     };
 }]);
 /**
@@ -1191,6 +1199,8 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
  * Load given set of states into the UI router $stateProvider
  */
 angular.module('pancakesAngular').provider('stateLoader', function () {
+
+    var stateCounter = 0;
 
     /**
      * Helper function to get pascal case of a route name
@@ -1261,8 +1271,11 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     };
                 }
 
-                // need to make sure state names are unique so just add a timestamp if nothing else
-                if (stateNames[stateName]) { stateName += (new Date()).getTime(); }
+                // need to make sure state names, so add a number if nothing else
+                if (stateNames[stateName]) {
+                    stateName += stateCounter;
+                    stateCounter++;
+                }
                 stateNames[stateName] = true;
 
                 // add state to the UI Router
