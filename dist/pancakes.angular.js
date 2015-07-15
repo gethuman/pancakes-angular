@@ -1200,6 +1200,8 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
  */
 angular.module('pancakesAngular').provider('stateLoader', function () {
 
+    var stateCounter = 0;
+
     /**
      * Helper function to get pascal case of a route name
      * @param val
@@ -1269,8 +1271,11 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     };
                 }
 
-                // need to make sure state names are unique so just add a timestamp if nothing else
-                if (stateNames[stateName]) { stateName += (new Date()).getTime(); }
+                // need to make sure state names, so add a number if nothing else
+                if (stateNames[stateName]) {
+                    stateName += stateCounter;
+                    stateCounter++;
+                }
                 stateNames[stateName] = true;
 
                 // add state to the UI Router
