@@ -660,7 +660,7 @@ angular.module('pancakesAngular').factory('eventBus', ["$document", "$rootScope"
  *
  * Listens for log events and sends them to the console
  */
-angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "eventBus", "config", function (extlibs, eventBus, config) {
+angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "eventBus", "config", "stateHelper", "activeUser", function (extlibs, eventBus, config, stateHelper, activeUser) {
     config = config || {};
 
     var raven = extlibs.get('Raven');
@@ -686,11 +686,18 @@ angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "event
             var err = logData.err;
             delete logData.err;
 
+            logData.url = stateHelper.getCurrentUrl();
+            logData.userId = activeUser._id;
+            logData.username = activeUser.username;
+
             err ?
-                raven.captureError(err) :
+                raven.captureError(err, { extra: logData }) :
                 angular.isString(logData) ?
-                    raven.captureMessage(logData) :
-                    raven.captureMessage(logData.msg, { extra: logData });
+                    raven.captureMessage(logData, { extra: logData }) :
+                    logData.msg ?
+                        raven.captureMessage(logData.msg, { extra: logData }) :
+                        raven.captureMessage(JSON.stringify(logData), { extra: logData });
+
         }
     }
 
@@ -1162,12 +1169,14 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     /**
      * Remove the query params from a page
      */
-    function removeQueryParams(params) {
-        params = params || getQueryParams();
+    function removeQueryParams() {
+        switchUrl($location.path());
 
-        if (!params.updated) {
-            switchUrl($location.path());
-        }
+        //params = params || getQueryParams();
+        //
+        //if (!params.updated) {
+        //    switchUrl($location.path());
+        //}
     }
 
     /**
