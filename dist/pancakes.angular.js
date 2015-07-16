@@ -979,27 +979,13 @@ angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$loc
 
     eventBus.on('$locationChangeSuccess', function () {
 
-        var url = $location.url();
-        var idx = url.indexOf('?');
-
-        // if there is a query string
-        if (idx < 0) { return; }
-
-        // get the query string and split the keyvals
-        var query = url.substring(idx + 1);
-        var keyVals = query.split('&');
-
-        // put each key/val into the params object
-        _.each(keyVals, function (keyVal) {
-            var keyValArr = keyVal.split('=');
-            params[keyValArr[0]] = keyValArr[1];
-        });
+        params = stateHelper.getQueryParams();
 
         // timeout for 500ms to allow angular to load the page as normal
         $timeout(function modParams() {
 
             // remove the query params
-            stateHelper.removeQueryParams();
+            stateHelper.removeQueryParams(params);
 
             // if there is a notify param, emit it so the notify service can display it
             if (params.notify) { eventBus.emit('notify', params.notify); }
@@ -1150,10 +1136,45 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     }
 
     /**
+     * Get params from the URL
+     */
+    function getQueryParams() {
+        var params = {};
+        var url = $location.url();
+        var idx = url.indexOf('?');
+
+        // if there is a query string
+        if (idx < 0) { return {}; }
+
+        // get the query string and split the keyvals
+        var query = url.substring(idx + 1);
+        var keyVals = query.split('&');
+
+        // put each key/val into the params object
+        _.each(keyVals, function (keyVal) {
+            var keyValArr = keyVal.split('=');
+            params[keyValArr[0]] = keyValArr[1];
+        });
+
+        return params;
+    }
+
+    /**
      * Remove the query params from a page
      */
-    function removeQueryParams() {
-        switchUrl($location.path());
+    function removeQueryParams(params) {
+        params = params || getQueryParams();
+
+        if (!params.updated) {
+            switchUrl($location.path());
+        }
+    }
+
+    /**
+     * By adding updated query param, we let browser know state has changed
+     */
+    function saveBrowserState() {
+        switchUrl($location.path() + '?updated=' + (new Date()).getTime());
     }
 
     /**
@@ -1203,7 +1224,9 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     return {
         goToUrl: goToUrl,
         switchUrl: switchUrl,
+        getQueryParams: getQueryParams,
         removeQueryParams: removeQueryParams,
+        saveBrowserState: saveBrowserState,
         getCurrentUrl: getCurrentUrl,
         getUserAgent: getUserAgent
     };
