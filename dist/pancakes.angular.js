@@ -986,7 +986,7 @@ angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$loc
 
     eventBus.on('$locationChangeSuccess', function () {
 
-        params = stateHelper.getQueryParams();
+        stateHelper.getQueryParams(params);
 
         // timeout for 500ms to allow angular to load the page as normal
         $timeout(function modParams() {
@@ -1145,8 +1145,8 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     /**
      * Get params from the URL
      */
-    function getQueryParams() {
-        var params = {};
+    function getQueryParams(params) {
+        params = params || {};
         var url = $location.url();
         var idx = url.indexOf('?');
 
