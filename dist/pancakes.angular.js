@@ -667,7 +667,7 @@ angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "event
     var useConsole = config.logTransport && config.logTransport.indexOf('console') >= 0;
     var useRemote = raven && config.logTransport && config.logTransport.indexOf('remote') >= 0;
 
-    if (raven) {
+    if (raven && raven.config) {
         raven.config(config.errorUrl, {}).install();
     }
 
