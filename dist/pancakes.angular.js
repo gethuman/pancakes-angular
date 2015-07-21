@@ -1351,12 +1351,20 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
     var localStorage = extlibs.get('localStorage');
     var cookieDomain = config.cookieDomain;
 
+    /* eslint no-empty:0 */
+
     /**
      * Remove a value from localStorage and cookies
      * @param name
      */
     function remove(name) {
-        localStorage.removeItem(name);
+
+        if (localStorage) {
+            try {
+                localStorage.removeItem(name);
+            }
+            catch (ex) {}
+        }
 
         _.isFunction($cookies.remove) ?
             $cookies.remove(name, { domain: cookieDomain }) :
@@ -1376,7 +1384,12 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
             return;
         }
 
-        localStorage.setItem(name, value);
+        if (localStorage) {
+            try {
+                localStorage.setItem(name, value);
+            }
+            catch (ex) {}
+        }
 
         _.isFunction($cookies.put) ?
             $cookies.put(name, value, { domain: cookieDomain }) :
@@ -1391,8 +1404,13 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
     function get(name) {
         var value = (_.isFunction($cookies.get) ? $cookies.get(name) : $cookies[name]);
 
-        if (!value) {
-            value = localStorage.getItem(name);
+        if (!value && localStorage) {
+
+            try {
+                value = localStorage.getItem(name);
+            }
+            catch (ex) {}
+
             if (value) {
                 set(name, value);
             }
