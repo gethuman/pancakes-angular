@@ -995,7 +995,10 @@ angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$loc
             stateHelper.removeQueryParams(params);
 
             // if there is a notify param, emit it so the notify service can display it
-            if (params.notify) { eventBus.emit('notify', params.notify); }
+            if (params.notify) {
+                eventBus.emit('notify', params.notify);
+                delete params.notify;
+            }
         }, 500);
     });
 
