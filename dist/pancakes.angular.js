@@ -120,8 +120,8 @@ angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "c
             .success(function (respData) {
                 deferred.resolve(respData);
             })
-            .error(function (err, status, headers, config) {
-                err = err || 'Unknown ajax error';
+            .error(function (err, status, headers, conf) {
+                err = err || new Error('Unknown ajax error');
 
                 if (showErr) {
                     eventBus.emit('error.api', err);
@@ -131,7 +131,7 @@ angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "c
                 log.error(err, {
                     status: status,
                     headers: headers,
-                    config: config
+                    config: conf
                 });
 
                 deferred.reject(err);
