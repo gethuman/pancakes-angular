@@ -703,17 +703,19 @@ angular.module('pancakesAngular').factory('clientLogReactor',
                     logData.msg = msg;
                 }
 
+                logData.msg = logData.msg || logData.message;
                 logData.url = stateHelper.getCurrentUrl();
                 logData.userId = activeUser._id;
                 logData.username = activeUser.username;
                 logData.lastApiCall = storage.get('lastApiCall');
 
+                if (!err && !logData.msg) {
+                    return;
+                }
+
                 err ?
                     raven.captureException(err, { extra: logData }) :
-                    logData.msg ?
-                        raven.captureMessage(logData.msg, { extra: logData }) :
-                        raven.captureMessage(JSON.stringify(logData), { extra: logData });
-
+                    raven.captureMessage(logData.msg, { extra: logData });
             }
         }
 
