@@ -32,7 +32,7 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  *
  * For angular clients to make ajax calls to server
  */
-angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "config", "storage", function ($q, $http, eventBus, config, storage) {
+angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "config", "storage", "log", function ($q, $http, eventBus, config, storage, log) {
 
     /**
      * Send call to the server and get a response
@@ -120,16 +120,21 @@ angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "c
             .success(function (respData) {
                 deferred.resolve(respData);
             })
-            .error(function (err) {
-                if (err) {
-                    if (showErr) {
-                        eventBus.emit('error.api', err);
-                    }
-                    deferred.reject(err);
+            .error(function (err, status, headers, config) {
+                err = err || 'Unknown ajax error';
+
+                if (showErr) {
+                    eventBus.emit('error.api', err);
                 }
-                else {
-                    deferred.resolve();
-                }
+
+                // todo: remove this once have debugged issues
+                log.error(err, {
+                    status: status,
+                    headers: headers,
+                    config: config
+                });
+
+                deferred.reject(err);
             })
             .finally(function () {
                 eventBus.emit(resourceName + '.' + method.toLowerCase() + '.end');
@@ -660,7 +665,7 @@ angular.module('pancakesAngular').factory('eventBus', ["$document", "$rootScope"
  *
  * Listens for log events and sends them to the console
  */
-angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "eventBus", "config", "stateHelper", "activeUser", function (extlibs, eventBus, config, stateHelper, activeUser) {
+angular.module('pancakesAngular').factory('clientLogReactor', ["_", "extlibs", "eventBus", "config", "stateHelper", "activeUser", function (_, extlibs, eventBus, config, stateHelper, activeUser) {
     config = config || {};
 
     var raven = extlibs.get('Raven');
@@ -671,6 +676,8 @@ angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "event
         raven.config(config.errorUrl, {}).install();
     }
 
+    /* eslint no-console:0 */
+
     /**
      * Send log to the console
      * @param event
@@ -678,8 +685,7 @@ angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "event
      */
     function log(event, logData) {
         if (useConsole) {
-            /* eslint no-console:0 */
-            console.log(logData + ' || ' + JSON.stringify(logData));
+            console.log(logData);
         }
 
         if (useRemote) {
