@@ -34,7 +34,7 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  */
 angular.module('pancakesAngular')
     .factory('ajaxInterceptor', ["$q", "$injector", "$timeout", "eventBus", function ($q, $injector, $timeout, eventBus) {
-        var maxRetries = 5;
+        var maxRetries = 7;
         var resetTime = 0;
 
         // if state changes, set the last reset (i.e. stop all retries)
@@ -53,7 +53,7 @@ angular.module('pancakesAngular')
                 // only do retry if the following is true:
                 //      1. no status returned in response (i.e. server didn't respond with anything)
                 //      2. it is a GET request
-                //      3. retry count under max threshold (i.e. only 5 retries allowed max)
+                //      3. retry count under max threshold (i.e. 7 retries allowed max)
                 //      4. a reset event hasn't occurred (i.e. the state hasn't changed)
                 if (!response.status && config.method === 'GET' &&
                     config.retryCount < maxRetries &&
