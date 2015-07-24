@@ -52,9 +52,11 @@ angular.module('pancakesAngular')
 
                 // only do retry if the following is true:
                 //      1. no status returned in response (i.e. server didn't respond with anything)
-                //      2. retry count under max threshold (i.e. only 5 retries allowed max)
-                //      3. a reset event hasn't occurred (i.e. the state hasn't changed)
-                if (!response.status && config.retryCount < maxRetries &&
+                //      2. it is a GET request
+                //      3. retry count under max threshold (i.e. only 5 retries allowed max)
+                //      4. a reset event hasn't occurred (i.e. the state hasn't changed)
+                if (!response.status && config.method === 'GET' &&
+                    config.retryCount < maxRetries &&
                     (!config.retryTime || config.retryTime > resetTime)) {
 
                     config.retryCount++;
