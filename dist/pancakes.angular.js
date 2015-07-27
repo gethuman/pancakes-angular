@@ -34,7 +34,7 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  */
 angular.module('pancakesAngular')
     .factory('ajaxInterceptor', ["$q", "$injector", "$timeout", "eventBus", function ($q, $injector, $timeout, eventBus) {
-        var maxRetries = 7;
+        var maxRetries = 10;
         var resetTime = 0;
 
         // if state changes, set the last reset (i.e. stop all retries)
@@ -65,7 +65,7 @@ angular.module('pancakesAngular')
                     var $http = $injector.get('$http');
                     var deferred = $q.defer();
 
-                    // do timeout to
+                    // do timeout to give some time in between retries
                     $timeout(function () {
                         $http(config)
                             .then(function (respData) {
@@ -766,6 +766,7 @@ angular.module('pancakesAngular').factory('clientLogReactor',
                     logData.msg = msg;
                 }
 
+                logData.yo = 'This is error: ' + err;
                 logData.msg = logData.msg || logData.message;
                 logData.url = stateHelper.getCurrentUrl();
                 logData.userId = activeUser._id;
@@ -774,6 +775,11 @@ angular.module('pancakesAngular').factory('clientLogReactor',
 
                 if (!err && !logData.msg) {
                     return;
+                }
+
+                if (!(err instanceof Error)) {
+                    logData.msg = JSON.stringify(err);
+                    err = null;
                 }
 
                 err ?
