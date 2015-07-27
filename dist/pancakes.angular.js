@@ -610,9 +610,9 @@ angular.module('pancakesAngular').factory('casing', function () {
         if ( !str.length ) {
             return str;
         }
-        return str.split('-').map(function(piece) {
+        return str.split('-').map(function (piece) {
             if ( piece.length ) {
-                return piece.substring(0,1).toUpperCase() + piece.substring(1);
+                return piece.substring(0, 1).toUpperCase() + piece.substring(1);
             }
             return piece;
         }).join('-');
@@ -735,56 +735,78 @@ angular.module('pancakesAngular').factory('clientLogReactor',
 
         config = config || {};
 
-        var raven = extlibs.get('Raven');
+        var errorClient = extlibs.get('Raven');
         var useConsole = config.logTransport && config.logTransport.indexOf('console') >= 0;
-        var useRemote = raven && config.logTransport && config.logTransport.indexOf('remote') >= 0;
+        var useRemote = errorClient && config.logTransport && config.logTransport.indexOf('remote') >= 0;
         var logLevel = config.logLevel || 'error';
 
-        if (raven && raven.config) {
-            raven.config(config.errorUrl, {}).install();
+        if (errorClient && errorClient.config) {
+            errorClient.config(config.errorUrl, {}).install();
         }
+
+        var ignoreErrs = [
+            'SkypeClick2Call',
+            'atomicFindClose',
+            'Cannot access back end',
+            'Cannot call method \'addListener\'',
+            'getElementsByTagName(\'video\')',
+            'Invalid character',
+            'NPObject',
+            'Unexpected token'
+        ];
 
         /* eslint no-console:0 */
 
         /**
          * Send log to the console
-         * @param event
          * @param logData
          */
+        function errorHandler(logData) {
+            if (!logData) {
+                return;
+            }
+
+            logData.msg = (logData.msg === 'undefined' || logData.msg === 'null') ? null : logData.msg;
+            logData.err = (logData.err === 'undefined' || logData.err === 'null') ? null : logData.err;
+
+            if (!logData.msg && !logData.err) {
+                return;
+            }
+
+            // extra data to help with debugging
+            logData.yo = 'This is error: ' + logData.err;
+            logData.msg = logData.msg || logData.message || logData.yo;
+            logData.url = stateHelper.getCurrentUrl();
+            logData.userId = activeUser._id;
+            logData.username = activeUser.username;
+            logData.lastApiCall = storage.get('lastApiCall');
+
+            if (!(logData.err instanceof Error)) {
+                delete logData.err;
+            }
+
+            if (logData.msg) {
+                for (var i = 0; i < ignoreErrs.length; i++) {
+                    if (logData.msg.indexOf(ignoreErrs[i]) >= 0) {
+                        return;
+                    }
+                }
+            }
+
+            logData.err ?
+                errorClient.captureException(logData.err, { extra: logData }) :
+                errorClient.captureMessage(logData.msg, { extra: logData });
+        }
+
         function log(event, logData) {
             if (useConsole) {
                 console.log(logData);
             }
 
-            if (useRemote) {
-                var err = logData.err;
-                delete logData.err;
+            if (useRemote && logData &&
+                (!logData.level || logData.level === 'error' || logData.level === 'critical')) {
 
-                if (angular.isString(logData)) {
-                    var msg = logData;
-                    logData = {};
-                    logData.msg = msg;
-                }
-
-                logData.yo = 'This is error: ' + err;
-                logData.msg = logData.msg || logData.message;
-                logData.url = stateHelper.getCurrentUrl();
-                logData.userId = activeUser._id;
-                logData.username = activeUser.username;
-                logData.lastApiCall = storage.get('lastApiCall');
-
-                if (!err && !logData.msg) {
-                    return;
-                }
-
-                if (!(err instanceof Error)) {
-                    logData.msg = JSON.stringify(err);
-                    err = null;
-                }
-
-                err ?
-                    raven.captureException(err, { extra: logData }) :
-                    raven.captureMessage(logData.msg, { extra: logData });
+                errorHandler(logData);
             }
         }
 
@@ -814,7 +836,8 @@ angular.module('pancakesAngular').factory('clientLogReactor',
         eventBus.on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, err) {
             log(event, {
                 err: err,
-                msg: 'state change error from ' + fromState + ' to ' + toState + ' with error: ' + err + '',
+                msg: 'state change error from ' + JSON.stringify(fromState) + ' to ' +
+                        JSON.stringify(toState) + ' with error: ' + err + '',
                 stack: err && err.stack,
                 inner: err && err.inner
             });
