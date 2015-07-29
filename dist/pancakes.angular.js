@@ -173,11 +173,11 @@ angular.module('pancakesAngular')
             // finally make the http call
             $http(apiOpts)
                 .success(function (respData) {
-                    storage.set('lastApiCall', JSON.stringify(apiOpts));
+                    storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
                     deferred.resolve(respData);
                 })
                 .error(function (err, status, headers, conf) {
-                    storage.set('lastApiCall', JSON.stringify(apiOpts));
+                    storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
 
                     if (!err && !status) {
                         err = new Error('Cannot access back end');
@@ -769,27 +769,25 @@ angular.module('pancakesAngular').factory('clientLogReactor',
             logData.msg = (logData.msg === 'undefined' || logData.msg === 'null') ? null : logData.msg;
             logData.err = (logData.err === 'undefined' || logData.err === 'null') ? null : logData.err;
 
+            logData.yo = 'This is error: ' + logData.err + ' with msg ' + logData.msg;
+            if (!(logData.err instanceof Error)) {
+                delete logData.err;
+            }
+
             if (!logData.msg && !logData.err) {
                 return;
             }
 
             // extra data to help with debugging
-            logData.yo = 'This is error: ' + logData.err;
             logData.msg = logData.msg || logData.message || logData.yo;
             logData.url = stateHelper.getCurrentUrl();
             logData.userId = activeUser._id;
             logData.username = activeUser.username;
             logData.lastApiCall = storage.get('lastApiCall');
 
-            if (!(logData.err instanceof Error)) {
-                delete logData.err;
-            }
-
-            if (logData.msg) {
-                for (var i = 0; i < ignoreErrs.length; i++) {
-                    if (logData.msg.indexOf(ignoreErrs[i]) >= 0) {
-                        return;
-                    }
+            for (var i = 0; i < ignoreErrs.length; i++) {
+                if (logData.yo.indexOf(ignoreErrs[i]) >= 0) {
+                    return;
                 }
             }
 
