@@ -1561,7 +1561,7 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
  * This allows us to create events off touch instead of the 300ms delay for click
  * events.
  */
-angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($timeout) {
+angular.module('pancakesAngular').factory('tapTrack', function () {
 
     // we want to prevent mistake double taps
     var lastElemTapped = null;
@@ -1582,7 +1582,7 @@ angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($ti
             var now = (new Date()).getTime();
             var diff = now - lastTapTime;
             var diffElemSafeDelay = elem !== lastElemTapped && diff > 200;
-            var sameElemSafeDelay = elem === lastElemTapped && diff > 2000;
+            var sameElemSafeDelay = elem === lastElemTapped && diff > 1000;
 
             if (tapped && (diffElemSafeDelay || sameElemSafeDelay)) {
                 lastElemTapped = elem;
@@ -1614,7 +1614,7 @@ angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($ti
     return {
         bind: bind
     };
-}]);
+});
 /**
  * Author: Jeff Whelpley
  * Date: 10/16/14
