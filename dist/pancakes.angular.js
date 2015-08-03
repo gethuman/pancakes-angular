@@ -1563,8 +1563,9 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
  */
 angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($timeout) {
 
-    // keep track of state of the tap with this boolean
-    var inProgress = false;
+    // we want to prevent mistake double taps
+    var lastElemTapped = null;
+    var lastTapTime = (new Date()).getTime();
 
     /**
      * Do the actual tap
@@ -1577,22 +1578,21 @@ angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($ti
         var tapped = false;
 
         // Attempt to do the action as long as tap not already in progress
-        var doAction = function () {
-            if (tapped && !inProgress) {
+        function doAction() {
+            var now = (new Date()).getTime();
+            var diff = now - lastTapTime;
+            var diffElemSafeDelay = elem !== lastElemTapped && diff > 200;
+            var sameElemSafeDelay = elem === lastElemTapped && diff > 2000;
 
-                // we are going to start the tap, don't allow another tap for 500 ms
-                inProgress = true;
-                $timeout(function () {
-                    inProgress = false;
-                }, 500);
-
-                // do the action
+            if (tapped && (diffElemSafeDelay || sameElemSafeDelay)) {
+                lastElemTapped = elem;
+                lastTapTime = now;
                 scope.$apply(action);
             }
-            else {
-                tapped = false;
-            }
-        };
+
+            // reset tapped at end
+            tapped = false;
+        }
 
         elem.bind('click', function (event) {                           // click event normal
             tapped = true;
