@@ -32,117 +32,187 @@ angular.module('pancakesAngular').factory('activeUser', function () {
  *
  * For angular clients to make ajax calls to server
  */
-angular.module('pancakesAngular').factory('ajax', ["$q", "$http", "eventBus", "config", "storage", function ($q, $http, eventBus, config, storage) {
+angular.module('pancakesAngular')
+    .factory('ajaxInterceptor', ["$q", "$injector", "$timeout", "eventBus", function ($q, $injector, $timeout, eventBus) {
+        var maxRetries = 10;
+        var resetTime = 0;
 
-    /**
-     * Send call to the server and get a response
-     *
-     * @param url
-     * @param method
-     * @param options
-     * @param resourceName
-     */
-    function send(url, method, options, resourceName) {
-        var deferred = $q.defer();
-        var key, val, paramArray = [];
+        // if state changes, set the last reset (i.e. stop all retries)
+        eventBus.on('$stateChangeSuccess', function () {
+            resetTime = (new Date()).getTime();
+        });
+        eventBus.on('$stateChangeError', function () {
+            resetTime = (new Date()).getTime();
+        });
 
-        url = config.apiBase + url;
-        options = options || {};
+        return {
+            'responseError': function (response) {
+                var config = response.config;
+                config.retryCount = config.retryCount || 0;
 
-        // separate out data if it exists
-        var data = options.data;
-        delete options.data;
+                // only do retry if the following is true:
+                //      1. no status returned in response (i.e. server didn't respond with anything)
+                //      2. it is a GET request
+                //      3. retry count under max threshold (i.e. 7 retries allowed max)
+                //      4. a reset event hasn't occurred (i.e. the state hasn't changed)
+                if (!response.status && config.method === 'GET' &&
+                    config.retryCount < maxRetries &&
+                    (!config.retryTime || config.retryTime > resetTime)) {
 
-        // attempt to add id to the url if it exists
-        if (url.indexOf('{_id}') >= 0) {
-            if (options._id) {
-                url = url.replace('{_id}', options._id);
+                    config.retryCount++;
+                    config.retryTime = (new Date()).getTime();
+
+                    var $http = $injector.get('$http');
+                    var deferred = $q.defer();
+
+                    // do timeout to give some time in between retries
+                    $timeout(function () {
+                        $http(config)
+                            .then(function (respData) {
+                                deferred.resolve(respData);
+                            })
+                            .catch(function (respData) {
+                                deferred.reject(respData);
+                            });
+                    }, 200 * config.retryCount);
+
+                    return deferred.promise;
+                }
+
+                // give up
+                return $q.reject(response);
+            }
+        };
+    }])
+    .config(["$httpProvider", function ($httpProvider) {
+        $httpProvider.interceptors.push('ajaxInterceptor');
+    }])
+    .factory('ajax', ["$q", "$http", "eventBus", "config", "storage", "log", function ($q, $http, eventBus, config, storage, log) {
+
+        /**
+         * Send call to the server and get a response
+         *
+         * @param url
+         * @param method
+         * @param options
+         * @param resourceName
+         */
+        function send(url, method, options, resourceName) {
+            var deferred = $q.defer();
+            var key, val, paramArray = [];
+
+            url = config.apiBase + url;
+            options = options || {};
+
+            // separate out data if it exists
+            var data = options.data;
+            delete options.data;
+
+            // attempt to add id to the url if it exists
+            if (url.indexOf('{_id}') >= 0) {
+                if (options._id) {
+                    url = url.replace('{_id}', options._id);
+                    delete options._id;
+                }
+                else if (data && data._id) {
+                    url = url.replace('{_id}', data._id);
+                }
+            }
+            else if (method === 'GET' && options._id) {
+                url += '/' + options._id;
                 delete options._id;
             }
-            else if (data && data._id) {
-                url = url.replace('{_id}', data._id);
+
+            var showErr = options.showErr !== false;
+            delete options.showErr;
+
+            // add params to the URL
+            options.lang = options.lang || config.lang;
+            for (key in options) {
+                if (options.hasOwnProperty(key) && options[key]) {
+                    val = options[key];
+                    val = angular.isObject(val) ? JSON.stringify(val) : val;
+
+                    paramArray.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+                }
             }
-        }
-        else if (method === 'GET' && options._id) {
-            url += '/' + options._id;
-            delete options._id;
-        }
 
-        var showErr = options.showErr !== false;
-        delete options.showErr;
-
-        // add params to the URL
-        options.lang = options.lang || config.lang;
-        for (key in options) {
-            if (options.hasOwnProperty(key) && options[key]) {
-                val = options[key];
-                val = angular.isObject(val) ? JSON.stringify(val) : val;
-
-                paramArray.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+            // add visitorId to params
+            var visitorId = storage.get('visitorId');
+            if (visitorId && visitorId !== 'null' && visitorId !== 'undefined') {
+                paramArray.push('onBehalfOfVisitorId' + '=' + visitorId);
             }
-        }
 
-        // add visitorId to params
-        var visitorId = storage.get('visitorId');
-        if (visitorId && visitorId !== 'null' && visitorId !== 'undefined') {
-            paramArray.push('onBehalfOfVisitorId' + '=' + visitorId);
-        }
+            // add params to URL
+            if (paramArray.length) {
+                url += '?' + paramArray.join('&');
+            }
 
-        // add params to URL
-        if (paramArray.length) {
-            url += '?' + paramArray.join('&');
-        }
-
-        // set up the api options
-        var apiOpts = {
-            method:     method,
-            url:        url
-        };
-
-        // if the jwt exists, add it to the request
-        var jwt = storage.get('jwt');
-        if (jwt && jwt !== 'null') {  // hack fix; someone setting localStorage to 'null'
-            apiOpts.headers = {
-                Authorization: jwt
+            // set up the api options
+            var apiOpts = {
+                method:     method,
+                url:        url
             };
-        }
 
-        // add data to api options if available
-        if (data) {
-            apiOpts.data = data;
-        }
+            // if the jwt exists, add it to the request
+            var jwt = storage.get('jwt');
+            if (jwt && jwt !== 'null') {  // hack fix; someone setting localStorage to 'null'
+                apiOpts.headers = {
+                    Authorization: jwt
+                };
+            }
 
-        // emit events for start and end so realtime services can stop syncing for post
-        eventBus.emit(resourceName + '.' + method.toLowerCase() + '.start');
+            // add data to api options if available
+            if (data) {
+                apiOpts.data = data;
+            }
 
-        // finally make the http call
-        $http(apiOpts)
-            .success(function (respData) {
-                deferred.resolve(respData);
-            })
-            .error(function (err) {
-                if (err) {
+            // emit events for start and end so realtime services can stop syncing for post
+            eventBus.emit(resourceName + '.' + method.toLowerCase() + '.start');
+
+            // finally make the http call
+            $http(apiOpts)
+                .success(function (respData) {
+                    storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
+                    deferred.resolve(respData);
+                })
+                .error(function (err, status, headers, conf) {
+                    storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
+
+                    if (!err && !status) {
+                        err = new Error('Cannot access back end');
+                    }
+                    else if (!err && status) {
+                        err = new Error('error httpCode ' + status);
+                    }
+
                     if (showErr) {
                         eventBus.emit('error.api', err);
                     }
+
+                    // todo: remove this once have debugged issues
+                    log.error(err, {
+                        apiOpts: apiOpts,
+                        status: status,
+                        headers: headers,
+                        config: conf
+                    });
+
                     deferred.reject(err);
-                }
-                else {
-                    deferred.resolve();
-                }
-            })
-            .finally(function () {
-                eventBus.emit(resourceName + '.' + method.toLowerCase() + '.end');
-            });
+                })
+                .finally(function () {
+                    eventBus.emit(resourceName + '.' + method.toLowerCase() + '.end');
+                });
 
-        return deferred.promise;
-    }
+            return deferred.promise;
+        }
 
-    // expose send
-    return {
-        send: send
-    };
-}]);
+        // expose send
+        return {
+            send: send
+        };
+    }]
+);
 
 /**
  * Author: Jeff Whelpley
@@ -540,9 +610,9 @@ angular.module('pancakesAngular').factory('casing', function () {
         if ( !str.length ) {
             return str;
         }
-        return str.split('-').map(function(piece) {
+        return str.split('-').map(function (piece) {
             if ( piece.length ) {
-                return piece.substring(0,1).toUpperCase() + piece.substring(1);
+                return piece.substring(0, 1).toUpperCase() + piece.substring(1);
             }
             return piece;
         }).join('-');
@@ -660,63 +730,123 @@ angular.module('pancakesAngular').factory('eventBus', ["$document", "$rootScope"
  *
  * Listens for log events and sends them to the console
  */
-angular.module('pancakesAngular').factory('clientLogReactor', ["extlibs", "eventBus", "config", function (extlibs, eventBus, config) {
-    config = config || {};
+angular.module('pancakesAngular').factory('clientLogReactor',
+    ["_", "extlibs", "eventBus", "config", "stateHelper", "activeUser", "storage", function (_, extlibs, eventBus, config, stateHelper, activeUser, storage) {
 
-    var raven = extlibs.get('Raven');
-    var useConsole = config.logTransport && config.logTransport.indexOf('console') >= 0;
-    var useRemote = raven && config.logTransport && config.logTransport.indexOf('remote') >= 0;
+        config = config || {};
 
-    if (raven) {
-        raven.config(config.errorUrl, {}).install();
-    }
+        var errorClient = extlibs.get('Raven');
+        var useConsole = config.logTransport && config.logTransport.indexOf('console') >= 0;
+        var useRemote = errorClient && config.logTransport && config.logTransport.indexOf('remote') >= 0;
+        var logLevel = config.logLevel || 'error';
 
-    /**
-     * Send log to the console
-     * @param event
-     * @param logData
-     */
-    function log(event, logData) {
-        if (useConsole) {
-            /* eslint no-console:0 */
-            console.log(logData + ' || ' + JSON.stringify(logData));
+        if (errorClient && errorClient.config) {
+            errorClient.config(config.errorUrl, {}).install();
         }
 
-        if (useRemote) {
-            var err = logData.err;
-            delete logData.err;
+        var ignoreErrs = [
+            'SkypeClick2Call',
+            'atomicFindClose',
+            'Cannot access back end',
+            'Cannot call method \'addListener\'',
+            'getElementsByTagName(\'video\')',
+            'Invalid character',
+            'NPObject',
+            'Unexpected token'
+        ];
 
-            err ?
-                raven.captureError(err) :
-                angular.isString(logData) ?
-                    raven.captureMessage(logData) :
-                    raven.captureMessage(logData.msg, { extra: logData });
+        /* eslint no-console:0 */
+
+        /**
+         * Send log to the console
+         * @param logData
+         */
+        function errorHandler(logData) {
+            if (!logData) {
+                return;
+            }
+
+            logData.msg = (logData.msg === 'undefined' || logData.msg === 'null') ? null : logData.msg;
+            logData.err = (logData.err === 'undefined' || logData.err === 'null') ? null : logData.err;
+
+            logData.yo = 'This is error: ' + logData.err + ' with msg ' + logData.msg;
+            if (!(logData.err instanceof Error)) {
+                delete logData.err;
+            }
+
+            if (!logData.msg && !logData.err) {
+                return;
+            }
+
+            // extra data to help with debugging
+            logData.msg = logData.msg || logData.message || logData.yo;
+            logData.url = stateHelper.getCurrentUrl();
+            logData.userId = activeUser._id;
+            logData.username = activeUser.username;
+            logData.lastApiCall = storage.get('lastApiCall');
+
+            for (var i = 0; i < ignoreErrs.length; i++) {
+                if (logData.yo.indexOf(ignoreErrs[i]) >= 0) {
+                    return;
+                }
+            }
+
+            logData.err ?
+                errorClient.captureException(logData.err, { extra: logData }) :
+                errorClient.captureMessage(logData.msg, { extra: logData });
         }
-    }
 
-    /******* INIT API & EVENT HANDLERS ********/
+        function log(event, logData) {
+            if (useConsole) {
+                console.log(logData);
+            }
 
-    eventBus.on('log.debug',    log);
-    eventBus.on('log.info',     log);
-    eventBus.on('log.error',    log);
-    eventBus.on('log.critical', log);
-    eventBus.on('error.api',    log);
+            if (useRemote && logData &&
+                (!logData.level || logData.level === 'error' || logData.level === 'critical')) {
 
-    // make sure we log any state change errors (only applies to client side)
-    eventBus.on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, err) {
-        eventBus.emit('log.error', {
-            err: err,
-            msg: err + '',
-            stack: err && err.stack,
-            inner: err && err.inner
+                errorHandler(logData);
+            }
+        }
+
+        /******* INIT API & EVENT HANDLERS ********/
+
+        if (logLevel === 'error') {
+            eventBus.on('log.error',    log);
+            eventBus.on('log.critical', log);
+            eventBus.on('error.api',    log);
+        }
+        else if (logLevel === 'info') {
+            eventBus.on('log.info',     log);
+            eventBus.on('log.error',    log);
+            eventBus.on('log.critical', log);
+            eventBus.on('error.api',    log);
+        }
+        else if (logLevel === 'debug') {
+            eventBus.on('log.debug',    log);
+            eventBus.on('log.info',     log);
+            eventBus.on('log.error',    log);
+            eventBus.on('log.critical', log);
+            eventBus.on('error.api',    log);
+        }
+
+
+        // make sure we log any state change errors (only applies to client side)
+        eventBus.on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, err) {
+            log(event, {
+                err: err,
+                msg: 'state change error from ' + JSON.stringify(fromState) + ' to ' +
+                        JSON.stringify(toState) + ' with error: ' + err + '',
+                stack: err && err.stack,
+                inner: err && err.inner
+            });
         });
-    });
 
-    // functions to expose (only for testing purposes)
-    return {
-        log: log
-    };
-}]);
+        // functions to expose (only for testing purposes)
+        return {
+            log: log
+        };
+    }]
+);
 /**
  * Author: Jeff Whelpley
  * Date: 10/15/14
@@ -979,30 +1109,19 @@ angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$loc
 
     eventBus.on('$locationChangeSuccess', function () {
 
-        var url = $location.url();
-        var idx = url.indexOf('?');
-
-        // if there is a query string
-        if (idx < 0) { return; }
-
-        // get the query string and split the keyvals
-        var query = url.substring(idx + 1);
-        var keyVals = query.split('&');
-
-        // put each key/val into the params object
-        _.each(keyVals, function (keyVal) {
-            var keyValArr = keyVal.split('=');
-            params[keyValArr[0]] = keyValArr[1];
-        });
+        stateHelper.getQueryParams(params);
 
         // timeout for 500ms to allow angular to load the page as normal
         $timeout(function modParams() {
 
             // remove the query params
-            stateHelper.removeQueryParams();
+            stateHelper.removeQueryParams(params);
 
             // if there is a notify param, emit it so the notify service can display it
-            if (params.notify) { eventBus.emit('notify', params.notify); }
+            if (params.notify) {
+                eventBus.emit('notify', params.notify);
+                delete params.notify;
+            }
         }, 500);
     });
 
@@ -1150,10 +1269,47 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     }
 
     /**
+     * Get params from the URL
+     */
+    function getQueryParams(params) {
+        params = params || {};
+        var url = $location.url();
+        var idx = url.indexOf('?');
+
+        // if there is a query string
+        if (idx < 0) { return {}; }
+
+        // get the query string and split the keyvals
+        var query = url.substring(idx + 1);
+        var keyVals = query.split('&');
+
+        // put each key/val into the params object
+        _.each(keyVals, function (keyVal) {
+            var keyValArr = keyVal.split('=');
+            params[keyValArr[0]] = keyValArr[1];
+        });
+
+        return params;
+    }
+
+    /**
      * Remove the query params from a page
      */
     function removeQueryParams() {
         switchUrl($location.path());
+
+        //params = params || getQueryParams();
+        //
+        //if (!params.updated) {
+        //    switchUrl($location.path());
+        //}
+    }
+
+    /**
+     * By adding updated query param, we let browser know state has changed
+     */
+    function saveBrowserState() {
+        switchUrl($location.path() + '?updated=' + (new Date()).getTime());
     }
 
     /**
@@ -1203,7 +1359,9 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     return {
         goToUrl: goToUrl,
         switchUrl: switchUrl,
+        getQueryParams: getQueryParams,
         removeQueryParams: removeQueryParams,
+        saveBrowserState: saveBrowserState,
         getCurrentUrl: getCurrentUrl,
         getUserAgent: getUserAgent
     };
@@ -1319,12 +1477,20 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
     var localStorage = extlibs.get('localStorage');
     var cookieDomain = config.cookieDomain;
 
+    /* eslint no-empty:0 */
+
     /**
      * Remove a value from localStorage and cookies
      * @param name
      */
     function remove(name) {
-        localStorage.removeItem(name);
+
+        if (localStorage) {
+            try {
+                localStorage.removeItem(name);
+            }
+            catch (ex) {}
+        }
 
         _.isFunction($cookies.remove) ?
             $cookies.remove(name, { domain: cookieDomain }) :
@@ -1344,7 +1510,12 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
             return;
         }
 
-        localStorage.setItem(name, value);
+        if (localStorage) {
+            try {
+                localStorage.setItem(name, value);
+            }
+            catch (ex) {}
+        }
 
         _.isFunction($cookies.put) ?
             $cookies.put(name, value, { domain: cookieDomain }) :
@@ -1359,8 +1530,13 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
     function get(name) {
         var value = (_.isFunction($cookies.get) ? $cookies.get(name) : $cookies[name]);
 
-        if (!value) {
-            value = localStorage.getItem(name);
+        if (!value && localStorage) {
+
+            try {
+                value = localStorage.getItem(name);
+            }
+            catch (ex) {}
+
             if (value) {
                 set(name, value);
             }
@@ -1385,10 +1561,11 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
  * This allows us to create events off touch instead of the 300ms delay for click
  * events.
  */
-angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($timeout) {
+angular.module('pancakesAngular').factory('tapTrack', function () {
 
-    // keep track of state of the tap with this boolean
-    var inProgress = false;
+    // we want to prevent mistake double taps
+    var lastElemTapped = null;
+    var lastTapTime = (new Date()).getTime();
 
     /**
      * Do the actual tap
@@ -1401,22 +1578,21 @@ angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($ti
         var tapped = false;
 
         // Attempt to do the action as long as tap not already in progress
-        var doAction = function () {
-            if (tapped && !inProgress) {
+        function doAction() {
+            var now = (new Date()).getTime();
+            var diff = now - lastTapTime;
+            var diffElemSafeDelay = elem !== lastElemTapped && diff > 200;
+            var sameElemSafeDelay = elem === lastElemTapped && diff > 1000;
 
-                // we are going to start the tap, don't allow another tap for 500 ms
-                inProgress = true;
-                $timeout(function () {
-                    inProgress = false;
-                }, 500);
-
-                // do the action
+            if (tapped && (diffElemSafeDelay || sameElemSafeDelay)) {
+                lastElemTapped = elem;
+                lastTapTime = now;
                 scope.$apply(action);
             }
-            else {
-                tapped = false;
-            }
-        };
+
+            // reset tapped at end
+            tapped = false;
+        }
 
         elem.bind('click', function (event) {                           // click event normal
             tapped = true;
@@ -1438,7 +1614,7 @@ angular.module('pancakesAngular').factory('tapTrack', ["$timeout", function ($ti
     return {
         bind: bind
     };
-}]);
+});
 /**
  * Author: Jeff Whelpley
  * Date: 10/16/14
