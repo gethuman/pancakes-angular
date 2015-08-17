@@ -90,6 +90,18 @@ angular.module('pancakesAngular')
     .factory('ajax', ["$q", "$http", "eventBus", "config", "storage", "log", function ($q, $http, eventBus, config, storage, log) {
 
         /**
+         * Save the options to storage for later debugging
+         */
+        function saveOpts(apiOpts) {
+            if (apiOpts.url && apiOpts.url.toLowerCase().indexOf('password') >= 0) {
+                var idx = apiOpts.url.indexOf('?');
+                apiOpts.url = apiOpts.url.substring(0, idx);
+            }
+
+            storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
+        }
+
+        /**
          * Send call to the server and get a response
          *
          * @param url
@@ -173,11 +185,11 @@ angular.module('pancakesAngular')
             // finally make the http call
             $http(apiOpts)
                 .success(function (respData) {
-                    storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
+                    saveOpts(apiOpts);
                     deferred.resolve(respData);
                 })
                 .error(function (err, status, headers, conf) {
-                    storage.set('lastApiCall', (JSON.stringify(apiOpts) || '').substring(0, 250));
+                    saveOpts(apiOpts);
 
                     if (!err && !status) {
                         err = new Error('Cannot access back end');
@@ -1576,15 +1588,17 @@ angular.module('pancakesAngular').factory('tapTrack', function () {
      */
     function bind(scope, elem, preventDefault, action) {
         var tapped = false;
+        var attrs = (elem && elem.attributes) || (elem && elem.length && elem[0] && elem[0].attributes) || {};
+        var sameElemSafeDelay = attrs['fast-tap'] ? 100 : 1000;
 
         // Attempt to do the action as long as tap not already in progress
         function doAction() {
             var now = (new Date()).getTime();
             var diff = now - lastTapTime;
-            var diffElemSafeDelay = elem !== lastElemTapped && diff > 200;
-            var sameElemSafeDelay = elem === lastElemTapped && diff > 1000;
+            var isDiffElemSafeDelay = elem !== lastElemTapped && diff > 200;
+            var isSameElemSafeDelay = elem === lastElemTapped && diff > sameElemSafeDelay;
 
-            if (tapped && (diffElemSafeDelay || sameElemSafeDelay)) {
+            if (tapped && (isDiffElemSafeDelay || isSameElemSafeDelay)) {
                 lastElemTapped = elem;
                 lastTapTime = now;
                 scope.$apply(action);
