@@ -149,12 +149,6 @@ angular.module('pancakesAngular')
                 }
             }
 
-            // add visitorId to params
-            var visitorId = storage.get('visitorId');
-            if (visitorId && visitorId !== 'null' && visitorId !== 'undefined') {
-                paramArray.push('onBehalfOfVisitorId' + '=' + visitorId);
-            }
-
             // add params to URL
             if (paramArray.length) {
                 url += '?' + paramArray.join('&');
