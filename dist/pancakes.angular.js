@@ -1146,21 +1146,19 @@ angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$win
  *
  * Don't apply if already digest cycle in process
  */
-angular.module('pancakesAngular').factory('safeApply', ["$timeout", function ($timeout) {
-    return function safeApply(fn) {
-        //scope = scope || $rootScope;
+angular.module('pancakesAngular').factory('safeApply', ["$rootScope", function ($rootScope) {
+    return function safeApply(fn, scope) {
+        scope = scope || $rootScope;
 
-        $timeout(fn, 0);
-
-        //var phase = scope.$$phase;
-        //if (phase === '$apply' || phase === '$digest') {
-        //    if (fn && (typeof fn === 'function')) {
-        //        fn();
-        //    }
-        //}
-        //else {
-        //    scope.$apply(fn);
-        //}
+        var phase = scope.$$phase;
+        if (phase === '$apply' || phase === '$digest') {
+            if (fn && (typeof fn === 'function')) {
+                fn();
+            }
+        }
+        else {
+            scope.$apply(fn);
+        }
     };
 }]);
 
