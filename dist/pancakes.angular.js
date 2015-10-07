@@ -46,7 +46,8 @@ angular.module('pancakesAngular')
         });
 
         return {
-            'responseError': function (response) {
+            responseError: function (response) {
+                var isTimeout = !response.status || response.status === -1;
                 var config = response.config;
                 config.retryCount = config.retryCount || 0;
 
@@ -55,7 +56,7 @@ angular.module('pancakesAngular')
                 //      2. it is a GET request
                 //      3. retry count under max threshold (i.e. 7 retries allowed max)
                 //      4. a reset event hasn't occurred (i.e. the state hasn't changed)
-                if (!response.status && config.method === 'GET' &&
+                if (isTimeout && config.method === 'GET' &&
                     config.retryCount < maxRetries &&
                     (!config.retryTime || config.retryTime > resetTime)) {
 
@@ -183,12 +184,20 @@ angular.module('pancakesAngular')
                     deferred.resolve(respData);
                 })
                 .error(function (err, status, headers, conf) {
-                    saveOpts(apiOpts);
 
-                    if (!err && !status) {
+                    // if status between 450 and 500, then assume it can be handled
+                    if (status > 450 && status < 499) {
+                        eventBus.emit('error.' + status, err);
+                        return;
+                    }
+
+                    saveOpts(apiOpts);
+                    var isTimeout = !status || status === -1;
+
+                    if (!err && isTimeout) {
                         err = new Error('Cannot access back end');
                     }
-                    else if (!err && status) {
+                    else if (!err) {
                         err = new Error('error httpCode ' + status + ' headers ' +
                             JSON.stringify(headers) + ' conf ' +
                             JSON.stringify(conf));
