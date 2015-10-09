@@ -666,7 +666,7 @@ angular.module('pancakesAngular').factory('clientAnalytics', ["$window", "$locat
      */
     function captureCurrentPath() {
         var gaq = $window._gaq || [];
-        gaq.push(['_trackPageview', $location.absUrl()]);
+        gaq.push(['_trackPageview', $location.path()]);
     }
 
     // add event handler if the gaq object exists on the window
