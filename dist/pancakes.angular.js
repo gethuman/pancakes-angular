@@ -673,15 +673,11 @@ angular.module('pancakesAngular').factory('clientAnalytics', ["$window", "$locat
         }
         else {
             tripwire = true; // just don't record the first one- it was already recorded in the head script
-            console.log('tripping the analytics tripwire');
         }
     }
-
     // add event handler if the gaq object exists on the window
     if ($window._gaq) {
-        eventBus.on('$stateChangeSuccess', function () {
-            captureCurrentPath();
-        });
+        eventBus.on('$stateChangeSuccess', captureCurrentPath);
     }
 
     // expose the function for testing purposes
@@ -972,7 +968,9 @@ angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", funct
         'text':         'i18n',
         'id':           null,
         'type':         null,
-        'class':        null
+        'class':        null,
+        'maxlength':    null,
+        'content':      null  // added for meta tags
     };
 
     var app = angular.module('pancakesAngular');
