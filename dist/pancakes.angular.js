@@ -661,19 +661,23 @@ angular.module('pancakesAngular').factory('chainPromises', ["$q", function ($q) 
  */
 angular.module('pancakesAngular').factory('clientAnalytics', ["$window", "$location", "eventBus", function ($window, $location, eventBus) {
 
+    var tripwire = false;
+
     /**
      * Sent to google using the _gaq object that should be loaded on the window
      */
     function captureCurrentPath() {
-        var gaq = $window._gaq || [];
-        gaq.push(['_trackPageview', $location.path()]);
+        if ( tripwire ) {
+            var gaq = $window._gaq || [];
+            gaq.push(['_trackPageview', $location.path()]);
+        }
+        else {
+            tripwire = true; // just don't record the first one- it was already recorded in the head script
+        }
     }
-
     // add event handler if the gaq object exists on the window
     if ($window._gaq) {
-        eventBus.on('$stateChangeSuccess', function () {
-            captureCurrentPath();
-        });
+        eventBus.on('$stateChangeSuccess', captureCurrentPath);
     }
 
     // expose the function for testing purposes
@@ -964,7 +968,9 @@ angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", funct
         'text':         'i18n',
         'id':           null,
         'type':         null,
-        'class':        null
+        'class':        null,
+        'maxlength':    null,
+        'content':      null  // added for meta tags
     };
 
     var app = angular.module('pancakesAngular');
