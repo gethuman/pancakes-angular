@@ -1351,6 +1351,14 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
     }
 
     /**
+     * Get just the part of the URL after the host name
+     * @returns {*}
+     */
+    function getPath() {
+        return $location.path();
+    }
+
+    /**
      * Get the current user agent
      */
     function getUserAgent() {
@@ -1392,6 +1400,7 @@ angular.module('pancakesAngular').factory('stateHelper', ["$window", "$timeout",
         getQueryParams: getQueryParams,
         removeQueryParams: removeQueryParams,
         saveBrowserState: saveBrowserState,
+        getPath: getPath,
         getCurrentUrl: getCurrentUrl,
         getUserAgent: getUserAgent
     };
