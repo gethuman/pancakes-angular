@@ -773,7 +773,13 @@ angular.module('pancakesAngular').factory('clientLogReactor',
             'getElementsByTagName(\'video\')',
             'Invalid character',
             'NPObject',
-            'Unexpected token'
+            'Unexpected token',
+            'NS_ERROR_',
+            'Failed to execute \'removeChild\' on \'Node\'',
+            'Out of memory',
+            'Error loading script',
+            'Could not login with that username',
+            'The email you entered is already registered'
         ];
 
         /* eslint no-console:0 */
@@ -806,8 +812,15 @@ angular.module('pancakesAngular').factory('clientLogReactor',
             logData.username = activeUser.username;
             logData.lastApiCall = storage.get('lastApiCall');
 
+            // jw: super hack to make sure ignore logs aren't sent to sentry
+            var yo = (logData.yo || '') + '';
+            var err = (logData.err || '') + '';
+            var msg = (logData.msg || '') + '';
             for (var i = 0; i < ignoreErrs.length; i++) {
-                if (logData.yo.indexOf(ignoreErrs[i]) >= 0) {
+                if (yo.indexOf(ignoreErrs[i]) >= 0 ||
+                    err.indexOf(ignoreErrs[i]) >= 0 ||
+                    msg.indexOf(ignoreErrs[i]) >= 0) {
+
                     return;
                 }
             }
@@ -856,7 +869,7 @@ angular.module('pancakesAngular').factory('clientLogReactor',
             log(event, {
                 err: err,
                 msg: 'state change error from ' + JSON.stringify(fromState) + ' to ' +
-                        JSON.stringify(toState) + ' with error: ' + err + '',
+                        JSON.stringify(toState) + ' with error: ' + err + ' ' + JSON.stringify(err),
                 stack: err && err.stack,
                 inner: err && err.inner
             });
@@ -1080,6 +1093,12 @@ angular.module('pancakesAngular').factory('initialModel', function () {
     return {};
 });
 
+/**
+ * Overwritten by individual apps
+ */
+angular.module('pancakesAngular').factory('modals', function () {
+    return {};
+});
 /**
  * Author: Jeff Whelpley
  * Date: 4/22/14
@@ -1458,8 +1477,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         }]
                     },
                     data: route.data,
-                    onEnter: ['$rootScope', function ($rootScope) {
+                    onEnter: ['$rootScope', 'modals', function ($rootScope, modals) {
                         $rootScope.stateData = route.data || {};
+                        $rootScope.modals = modals;
                         $rootScope.pageLoadTimestamp = (new Date()).getTime();
                     }],
                     views: {
@@ -1478,6 +1498,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                 }
 
                 //TODO: need to have better way of not including sideview
+
                 if (!isMobile) {
                     stateConfig.views.sideview = {
                         controller:     getPascalCase(appName + '.sideview.' + sideview + '.ctrl'),
@@ -1493,7 +1514,13 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                 stateNames[stateName] = true;
 
                 // add state to the UI Router
-                $stateProvider.state(stateName, stateConfig);
+                try {
+                    $stateProvider.state(stateName, stateConfig);
+                }
+                catch (ex) {
+                    /* eslint no-console:0 */
+                    console.error(ex);
+                }
             });
         });
     };
