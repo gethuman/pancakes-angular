@@ -20,9 +20,9 @@
   },
   "homepage": "https://github.com/gethuman/pancakes-angular",
   "dependencies": {
-    "angular": "1.4.9",
-    "angular-cookies": "1.4.9",
-    "angular-mocks": "1.4.9",
+    "angular": "1.4.8",
+    "angular-cookies": "1.4.8",
+    "angular-mocks": "1.4.8",
     "gulp-concat": "^2.6.0",
     "gulp-ng-annotate": "^1.1.0",
     "gulp-rename": "^1.2.2",
