@@ -26,7 +26,10 @@ angular.module('{{=it.appName}}').run([
             }
         });
 
-        auth.hookEvents();
+        if (auth && auth.hookEvents) {
+            auth.hookEvents();
+        }
+
         {{?}}
     }
 ]);
