@@ -1484,9 +1484,13 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     },
                     data: route.data,
                     onEnter: ['$rootScope', 'modals', function ($rootScope, modals) {
-                        $rootScope.stateData = route.data || {};
-                        $rootScope.modals = modals;
+                        $rootScope.modals = $rootScope.modals || modals;
                         $rootScope.pageLoadTimestamp = (new Date()).getTime();
+                        $rootScope.stateData = $rootScope.stateData || {};
+
+                        angular.forEach(route.data, function (subdata, subname) {
+                            $rootScope.stateData[subname] = subdata;
+                        });
                     }],
                     views: {
                         '': {
