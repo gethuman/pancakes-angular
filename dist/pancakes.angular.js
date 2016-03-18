@@ -1108,13 +1108,21 @@ angular.module('pancakesAngular').factory('modals', function () {
 angular.module('pancakesAngular').factory('pageSettings', ["$window", "$rootElement", function ($window, $rootElement) {
 
     /**
+     * Update the title using the $window object
+     * @param title
+     */
+    function updateTitle(title) {
+        $window.document.title = title;
+    }
+
+    /**
      * Set the page title and description
      * @param title
      * @param description
      */
     function updateHead(title, description) {
+        updateTitle(title);
         description = (description || '').replace(/"/g, '');
-        $window.document.title = title;
         var metaDesc = angular.element($rootElement.find('meta[name=description]')[0]);
         metaDesc.attr('content', description);
     }
@@ -1486,11 +1494,14 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     onEnter: ['$rootScope', 'modals', function ($rootScope, modals) {
                         $rootScope.modals = $rootScope.modals || modals;
                         $rootScope.pageLoadTimestamp = (new Date()).getTime();
+                        $rootScope.stateData = route.data || {};
+                        /*
                         $rootScope.stateData = $rootScope.stateData || {};
 
                         angular.forEach(route.data, function (subdata, subname) {
                             $rootScope.stateData[subname] = subdata;
                         });
+                        */
                     }],
                     views: {
                         '': {
