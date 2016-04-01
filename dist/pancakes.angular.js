@@ -667,16 +667,16 @@ angular.module('pancakesAngular').factory('clientAnalytics', ["$window", "$locat
      * Sent to google using the _gaq object that should be loaded on the window
      */
     function captureCurrentPath() {
-        if ( tripwire ) {
-            var gaq = $window._gaq || [];
-            gaq.push(['_trackPageview', $location.path()]);
+        if (tripwire ) {
+            $window.ga('send', 'pageview', $location.path());
         }
         else {
             tripwire = true; // just don't record the first one- it was already recorded in the head script
         }
     }
+
     // add event handler if the gaq object exists on the window
-    if ($window._gaq) {
+    if ($window.ga) {
         eventBus.on('$stateChangeSuccess', captureCurrentPath);
     }
 
