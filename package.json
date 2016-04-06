@@ -27,7 +27,7 @@
     "gulp-ng-annotate": "2.0.0",
     "gulp-rename": "1.2.2",
     "gulp-uglify": "1.5.3",
-    "jangular": "0.2.59",
+    "jangular": "0.2.60",
     "lodash": "4.8.2",
     "lru-cache": "4.0.1",
     "mocha": "2.4.5",
