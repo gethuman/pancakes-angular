@@ -756,25 +756,25 @@ angular.module('pancakesAngular').factory('clientLogReactor',
 
         config = config || {};
 
-        var errorClient = extlibs.get('NREUM');
+        // var errorClient = extlibs.get('NREUM');
         var useConsole = config.logTransport && config.logTransport.indexOf('console') >= 0;
-        var useRemote = errorClient && config.logTransport && config.logTransport.indexOf('remote') >= 0;
+        // var useRemote = errorClient && config.logTransport && config.logTransport.indexOf('remote') >= 0;
         var logLevel = config.logLevel || 'error';
 
         // log to console and to new relic
         function log(event, logData) {
             logData = logData || {};
-            var status = logData.status || 0;
-            var statusOkToLogRemote = status < 400 || status > 498;
+            // var status = logData.status || 0;
+            // var statusOkToLogRemote = status < 400 || status > 498;
 
             if (useConsole) {
                 console.log(logData);
             }
 
             // log remotely if non-AppError error and remote is active
-            if (useRemote && logData.msg && statusOkToLogRemote) {
-                errorClient.noticeError(new Error(logData.msg));
-            }
+            // if (useRemote && logData.msg && statusOkToLogRemote) {
+            //     errorClient.noticeError(new Error(logData.msg));
+            // }
         }
 
         /******* INIT API & EVENT HANDLERS ********/
