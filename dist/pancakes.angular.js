@@ -768,6 +768,7 @@ angular.module('pancakesAngular').factory('clientLogReactor',
             // var statusOkToLogRemote = status < 400 || status > 498;
 
             if (useConsole) {
+                /* eslint no-console:0 */
                 console.log(logData);
             }
 
@@ -882,6 +883,12 @@ angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", funct
      */
     function blur(selector) {
         $timeout(function blurFocus() {
+
+            // fix for iOS
+            if (document && document.activeElement && document.activeElement.blur) {
+                document.activeElement.blur();
+            }
+
             var el = jQuery(selector);
             if (el && el.length) {
                 el[0].blur();
