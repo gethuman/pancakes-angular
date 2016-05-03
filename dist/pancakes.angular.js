@@ -932,7 +932,7 @@ angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", funct
     var attrPascal, type;
 
     // function used for each of the generic directives
-    function addDirective(directiveName, attrName, filterType, isBind, isBindOnce, isFilter) {
+    function addDirective(directiveName, dashCase, attrName, filterType, isBind, isBindOnce, isFilter) {
         app.directive(directiveName, ['i18n', 'config', function (i18n, config) {
 
             function setValue(scope, element, attrs, value) {
@@ -965,9 +965,11 @@ angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", funct
 
                     // else we are not binding, but we want to do some filtering
                     else if (!isBind && isFilter && filterType !== null) {
+                        var fTextVal = (element && element.length && element[0].attributes &&
+                            element[0].attributes[dashCase] && element[0].attributes[dashCase].value) || '';
 
                         // if the value contains {{ it means there is interpolation
-                        if (originalValue.indexOf('{{') >= 0) {
+                        if (fTextVal.indexOf('{{') >= 0) {
                             var unobserve = attrs.$observe(directiveName, function (value) {
                                 setValue(scope, element, attrs, value);
                                 if (isBindOnce && unobserve) { unobserve(); }
@@ -993,18 +995,18 @@ angular.module('pancakesAngular').factory('focus', ["$timeout", "extlibs", funct
 
             // no b-class because just adding class one time
             if (attr !== 'class') {
-                addDirective('b' + attrPascal, attr, null, true, false, false);
+                addDirective('b' + attrPascal, 'b-' + attr, attr, null, true, false, false);
             }
 
-            addDirective('bo' + attrPascal, attr, null, true, true, false);
+            addDirective('bo' + attrPascal, 'bo-' + attr, attr, null, true, true, false);
 
             // if file then do f- and bf- for static file
             type = genericDirectives[attr];
             if (type) {
-                addDirective('f' + attrPascal, attr, type, false, false, true);
-                addDirective('fo' + attrPascal, attr, type, false, true, true);
-                addDirective('bf' + attrPascal, attr, type, true, false, true);
-                addDirective('bfo' + attrPascal, attr, type, true, true, true);
+                addDirective('f' + attrPascal, 'f-' + attr, attr, type, false, false, true);
+                addDirective('fo' + attrPascal, 'fo-' + attr, attr, type, false, true, true);
+                addDirective('bf' + attrPascal, 'bf-' + attr, attr, type, true, false, true);
+                addDirective('bfo' + attrPascal, 'bfo-' + attr, attr, type, true, true, true);
             }
         }
     }
