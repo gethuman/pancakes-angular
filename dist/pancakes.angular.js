@@ -1416,7 +1416,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
     this.loadStates = function loadStates($stateProvider, appName, routes, resolves, isMobile) {
         var stateNames = {};
         angular.forEach(routes, function (route) {
-            angular.forEach(route.urls, function (url, idx) {
+            var urls = route.urls || [''];
+
+            angular.forEach(urls, function (url) {
                 var sideview = route.sideview || 'default';
                 var initialModel = resolves[route.name] || function () { return {}; };
 
@@ -1425,9 +1427,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     return;
                 }
 
-                var stateName = (route.name + (idx === 0 ? '' : '--' + idx)).replace(/\./g, '-');
+                // name of the state is dash case for route name in .app file
+                var stateName = route.name.replace(/\./g, '-');
                 var stateConfig = {
-                    url: url,
                     resolve: {
                         initialModel: initialModel,
                         loadedUser: ['activeUser', function (activeUser) {
@@ -1454,6 +1456,9 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         }
                     }
                 };
+                if (url) {
+                    stateConfig.url = url;
+                }
                 if (route.data) {
                     stateConfig.data = route.data;
                 }
@@ -1471,7 +1476,7 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                     };
                 }
 
-                // need to make sure state names, so add a number if nothing else
+                // need to make sure unique state names, so add a number if nothing else
                 if (stateNames[stateName]) {
                     stateName += stateCounter;
                     stateCounter++;
