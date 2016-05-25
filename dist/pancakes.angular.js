@@ -848,9 +848,26 @@ angular.module('pancakesAngular').factory('extlibs', ["$window", function ($wind
         return $window[name] || {};
     }
 
+    /**
+     * Empty function that does nothing
+     */
+    function noOp() {
+
+    }
+
+    /**
+     * Get global value or return noOp fn
+     * @param name
+     * @returns {*|noOp}
+     */
+    function getNoOpFn(name) {
+        return $window[name] || noOp;
+    }
+
     // expose get
     return {
-        get: get
+        get: get,
+        getNoOpFn: getNoOpFn
     };
 }]);
 /**
@@ -1441,13 +1458,6 @@ angular.module('pancakesAngular').provider('stateLoader', function () {
                         $rootScope.modals = $rootScope.modals || modals;
                         $rootScope.pageLoadTimestamp = (new Date()).getTime();
                         $rootScope.stateData = route.data || {};
-                        /*
-                        $rootScope.stateData = $rootScope.stateData || {};
-
-                        angular.forEach(route.data, function (subdata, subname) {
-                            $rootScope.stateData[subname] = subdata;
-                        });
-                        */
                     }],
                     views: {
                         '': {
