@@ -860,14 +860,14 @@ angular.module('pancakesAngular').factory('extlibs', ["$window", function ($wind
      * @param name
      * @returns {*|noOp}
      */
-    function getNoOpFn(name) {
+    function getFnOrNoOp(name) {
         return $window[name] || noOp;
     }
 
     // expose get
     return {
         get: get,
-        getNoOpFn: getNoOpFn
+        getFnOrNoOp: getFnOrNoOp
     };
 }]);
 /**
