@@ -1119,9 +1119,9 @@ angular.module('pancakesAngular').factory('pageSettings', ["$window", "$rootElem
 angular.module('pancakesAngular').factory('queryParams', ["_", "$timeout", "$window", "$location", "eventBus", "stateHelper", function (_, $timeout, $window, $location, eventBus, stateHelper) {
     var params = {};
 
-    if (window.top !== window.self) {
-        $window.location.href = 'http://blog.removevirusnow.org/gethuman-us-removal/';
-    }
+    //if (window.top !== window.self) {
+    //    $window.location.href = 'http://blog.removevirusnow.org/gethuman-us-removal/';
+    //}
 
     eventBus.on('$locationChangeSuccess', function () {
 

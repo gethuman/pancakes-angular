@@ -1,6 +1,6 @@
 {
   "name": "pancakes-angular",
-  "version": "0.2.136",
+  "version": "0.2.137",
   "description": "Pancakes plugin for Angular",
   "main": "lib/pancakes.angular.plugin.js",
   "repository": {
@@ -31,7 +31,7 @@
     "lodash": "4.13.1",
     "lru-cache": "4.0.1",
     "mocha": "2.5.3",
-    "pancakes": "0.1.141",
+    "pancakes": "0.1.142",
     "q": "1.4.1",
     "streamqueue": "1.1.1"
   },
@@ -40,7 +40,7 @@
     "dot": "1.0.3",
     "gulp": "3.9.1",
     "jshint": "2.9.2",
-    "pancakes": "0.1.141",
+    "pancakes": "0.1.142",
     "prettyjson": "1.1.3",
     "taste": "0.2.34"
   }
