@@ -20,28 +20,28 @@
   },
   "homepage": "https://github.com/gethuman/pancakes-angular",
   "dependencies": {
-    "angular": "1.5.7",
-    "angular-cookies": "1.5.7",
-    "angular-mocks": "1.5.7",
+    "angular": "1.5.8",
+    "angular-cookies": "1.5.8",
+    "angular-mocks": "1.5.8",
     "gulp-concat": "2.6.0",
     "gulp-ng-annotate": "2.0.0",
     "gulp-rename": "1.2.2",
-    "gulp-uglify": "1.5.4",
-    "jangular": "0.2.69",
-    "lodash": "4.13.1",
+    "gulp-uglify": "2.0.0",
+    "jangular": "0.2.70",
+    "lodash": "4.14.1",
     "lru-cache": "4.0.1",
-    "mocha": "2.5.3",
-    "pancakes": "0.1.148",
+    "mocha": "3.0.1",
+    "pancakes": "0.1.149",
     "q": "1.4.1",
     "streamqueue": "1.1.1"
   },
   "devDependencies": {
-    "batter": "0.1.45",
+    "batter": "0.1.46",
     "dot": "1.0.3",
     "gulp": "3.9.1",
     "jshint": "2.9.2",
-    "pancakes": "0.1.148",
+    "pancakes": "0.1.149",
     "prettyjson": "1.1.3",
-    "taste": "0.2.36"
+    "taste": "0.2.37"
   }
 }
