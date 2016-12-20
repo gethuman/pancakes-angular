@@ -25,8 +25,8 @@ angular.module('{{=it.appName}}').directive('{{=it.directiveName}}', [
 {{?}}
 
 angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
-    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', '$state', '$q', 'tplHelper',
-    function ({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, $state, $q, tplHelper) {
+    {{~it.convertedParams :param}}'{{=param}}', {{~}}{{? it.isPage }}'initialModel', {{?}}'$scope', '$state', '$q', 'tplHelper', 'log',
+    function ({{~it.params :param}}{{=param}}, {{~}}{{? it.isPage }}initialModel, {{?}}$scope, $state, $q, tplHelper, log) {
 
         {{~it.ngrefs :param}}
         var {{=param}} = angular;
@@ -77,7 +77,7 @@ angular.module('{{=it.appName}}').controller('{{=it.controllerName}}', [
         {{? it.useRerenderOnWatch}}.then(function() {return tplHelper.rerenderOnScopeChange($scope, {{=it.rerenderWatchers}});}){{?}}
         {{? it.useRerenderOnEvent}}.then(function() {return tplHelper.rerenderOnEvent($scope, {{=it.rerenderEvents}});}){{?}}
         {{? it.clientLoadExists  }}.then(function() {return tplHelper.onClientLoad({{=it.clientLoadFn}});}){{?}}
-        .then(function() { return true; }).catch(function(e) { console.log('Model/render error: ' + e); });
+        .then(function() { return true; }).catch(function(e) { log.error(e); });
 
         {{=it.body}}
     }

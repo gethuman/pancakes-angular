@@ -30,7 +30,7 @@
     "jangular": "^0.2.76",
     "lodash": "^4.17.2",
     "mocha": "^3.2.0",
-    "pancakes": "^0.1.153",
+    "pancakes": "^0.1.154",
     "q": "1.4.1"
   },
   "devDependencies": {
