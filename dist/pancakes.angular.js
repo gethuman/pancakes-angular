@@ -182,7 +182,7 @@ angular.module('pancakesAngular')
                 .then(function (respData) {
                     respData = respData || {};
                     saveOpts(apiOpts);
-                    deferred.resolve(respData.data || respData);
+                    deferred.resolve(respData.data); //deferred.resolve(respData.data || respData);
                 })
                 .catch(function (err) {
 
